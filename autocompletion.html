@@ -20,7 +20,7 @@
       <div class="container" id="left-panel">
       <div class="page-header text-uppercase text-center"><span class="glyphicon glyphicon-globe" aria-hidden="true"></span> Post-Erasmus Trip Project</div>
       <div id="search-panel">
-        <input id="pac-input" type="text" class="form-control" placeholder="Search for a location">
+        <input id="pac-input" type="text" class="form-control" placeholder="Add a location">
         <div id="mode-selector">
           <label class="radio-inline">
             <input type="radio" name="type" id="changemode-driving" checked="checked">Driving
@@ -53,13 +53,11 @@
             </div><!-- /.modal-content -->
           </div><!-- /.modal-dialog -->
         </div><!-- /.modal -->
-      <br>
-      <b>Start:</b>
-      <input id="start" type="text">
-      <br>
-      <b>Waypoints:</b> <br>
-      <div id="waypoints" class="list-group"></div>
-      <input type="submit" id="submit">
+      <div>
+        <h3>Places</h3>
+        <div id="waypoints" class="list-group"><p class="text-center">Add some places to visit!</p></div>
+      </div>
+      <button id="submit" type="submit" class="btn btn-default">Submit</button>
       </div>
       <div id="directions-panel"></div>
       </div>

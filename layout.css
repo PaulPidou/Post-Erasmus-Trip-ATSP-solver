@@ -29,6 +29,8 @@ html, body {
 #waypoints .pull-right {display: none; cursor: pointer;}
 #waypoints .selected {background-color: #f5f5f5;}
 #waypoints .selected .pull-right {display: inline; cursor: pointer;}
+#waypoints .start-glyph, #waypoints .end-glyph {margin: 0px 3px; display:none;}
+#waypoints .start .start-glyph, #waypoints .end .end-glyph {display: inline;}
 .popover .list-group {margin-bottom: 5px;}
 .popover-content {padding: 0px;}
 #directions-panel {

@@ -5,6 +5,8 @@ function initMap() {
   var directionsDisplay = new google.maps.DirectionsRenderer;
   var travel_mode = google.maps.TravelMode.DRIVING;
   
+  var start_end = ['', ''];
+  
   var map = new google.maps.Map(document.getElementById('map'), {
     center: {lat: 25, lng: 0},
     zoom: 2
@@ -59,7 +61,18 @@ function initMap() {
       });
       markers.push(marker);
       bounds.extend(new google.maps.LatLng(locations[i][1], locations[i][2]));
-      text += '<a class="list-group-item" id="' + locations[i][0] + '_' + locations[i][1] + '_' + locations[i][2] + '"><span class="glyphicon glyphicon-map-marker"></span> ' + locations[i][0] + '<span class="glyphicon glyphicon-trash remove pull-right"></span> <span class="glyphicon glyphicon-option-vertical pull-right settings" data-popover="true" data-container="body" data-toggle="popover" data-placement="top" data-html=true data-content="<div class=\'list-group\'><a href=\'#\' class=\'list-group-item\'><span class=\'glyphicon glyphicon-home\'></span> Set as starting point</a><a href=\'#\' class=\'list-group-item\'><span class=\'glyphicon glyphicon-flag\'></span> Set as arriving point</a><div>"></span></a>';
+      var id = locations[i][0] + '_' + locations[i][1] + '_' + locations[i][2];
+      if (locations.length == 1) {
+        start_end = [id, id];
+      }
+      text += '<a class="list-group-item ';
+      if (id == start_end[0]) {
+        text += ' start ';
+      }
+      if (id == start_end[1]) {
+        text += ' end ';
+      }
+        text += '" id="' + id + '"><span class="glyphicon glyphicon-map-marker"></span> ' + locations[i][0] + ' <span class="start-glyph glyphicon glyphicon-home"></span><span class="end-glyph glyphicon glyphicon-flag"></span><span class="glyphicon glyphicon-trash remove pull-right"></span> <span class="glyphicon glyphicon-option-vertical pull-right settings" data-popover="true" data-container="body" data-toggle="popover" data-placement="top" data-html=true data-content="<div class=\'list-group\'><a href=\'#\' class=\'list-group-item start-link\'><span class=\'glyphicon glyphicon-home\'></span> Set as starting point</a><a href=\'#\' class=\'list-group-item end-link\'><span class=\'glyphicon glyphicon-flag\'></span> Set as arriving point</a><div>"></span></a>';
     }
     
     if (locations.length == 1) {
@@ -68,6 +81,8 @@ function initMap() {
     } else if (locations.length == 0) {
       map.setCenter({lat: 25, lng: 0});
       map.setZoom(2);
+      start_end['', ''];
+      text = '<p class="text-center">Add some places to visit!</p>';
     } else {
       map.fitBounds(bounds);
     }
@@ -100,7 +115,7 @@ function initMap() {
   $(document).on('click', '#waypoints a .remove', function() {
     for(var i = 0; i < locations.length; i++) {
       if ($(this).parent().attr('id') == locations[i][0] + '_' + locations[i][1] + '_' + locations[i][2]) {
-        locations.splice(locations.indexOf(i), 1);
+        locations.splice(i, 1);
         break;
       }
     }
@@ -122,8 +137,8 @@ function initMap() {
     var id = target.parent().attr('id');
     element = getElementWithAttribute('aria-describedby', id);
     return element.closest('a').id;
-}
-  //$('body').popover({selector: '[data-popover]', trigger: 'click hover', delay: {show: 50, hide: 10}});
+  }
+
   $('body').popover({selector: '[data-popover]', trigger: 'manual', animation: false})
     .on('mouseenter', '#waypoints a .settings' , function () {
       var _this = this;
@@ -142,6 +157,20 @@ function initMap() {
           }
       }, 100);
     });
+    
+  $(document).on('click', '.popover .list-group a', function(ev) {
+    var target = $(ev.target);
+    element = getElementWithAttribute('aria-describedby', target.closest('.popover').attr('id'));
+    if (target.attr('class') == 'list-group-item start-link') {
+      start_end[0] = element.closest('a').id;
+      $('#waypoints a').removeClass('start');
+      document.getElementById(start_end[0]).className += ' start';
+    } else if (target.attr('class') == 'list-group-item end-link') {
+      start_end[1] = element.closest('a').id;
+      $('#waypoints a').removeClass('end');
+      document.getElementById(start_end[1]).className += ' end';
+    }
+  });
 }
 
 function calculateAndDisplayRoute(directionsService, directionsDisplay, travel_mode) {
@@ -154,8 +183,8 @@ function calculateAndDisplayRoute(directionsService, directionsDisplay, travel_m
   }
 
   directionsService.route({
-    origin: document.getElementById('start').value,
-    destination: document.getElementById('start').value,
+    origin: document.getElementsByClassName('start')[0].textContent,
+    destination: document.getElementsByClassName('end')[0].textContent,
     waypoints: waypts,
     optimizeWaypoints: true,
     travelMode: travel_mode
