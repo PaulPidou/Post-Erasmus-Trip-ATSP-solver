@@ -21,20 +21,36 @@
       <div class="page-header text-uppercase text-center"><span class="glyphicon glyphicon-globe" aria-hidden="true"></span> Post-Erasmus Trip Project</div>
       <div id="search-panel">
         <input id="pac-input" type="text" class="form-control" placeholder="Add a location">
-        <div id="mode-selector">
-          <label class="radio-inline">
-            <input type="radio" name="type" id="changemode-driving" checked="checked">Driving
+          <div id="mode-selector" class="btn-group btn-group-justified" role="group" data-toggle="buttons">
+            <div class="btn-group" role="group">
+              <label class="btn btn-default active" style="width: 75%;border-top-left-radius:0px">
+                <input type="radio" name="type" id="changemode-driving" autocomplete="off" checked="checked"> Driving
+              </label>
+              <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="width: 26%;">
+                <span class="caret"></span>
+                <span class="sr-only">Toggle Dropdown</span>
+              </button>
+              <ul class="dropdown-menu">
+                <li><a href="#">Avoid tolls</a></li>
+                <li><a href="#">Avoid highways</a></li>
+              </ul>
+            </div>
+          <div class="btn-group" role="group">
+          <label class="btn btn-default">
+            <input type="radio" name="type" id="changemode-bicycling" autocomplete="off"> Bicycling
           </label>
-          <label class="radio-inline">
-            <input type="radio" name="type" id="changemode-transit">Transit
+          </div>
+          <div class="btn-group" role="group">
+          <label class="btn btn-default">
+            <input type="radio" name="type" id="changemode-walking" autocomplete="off"> Walking
           </label>
-          <label class="radio-inline">
-            <input type="radio" name="type" id="changemode-bicycling">Bicycling
+          </div>
+          <div class="btn-group" role="group">
+          <label class="btn btn-default" style="border-top-right-radius:0px">
+            <input type="radio" name="type" id="changemode-walking" autocomplete="off"> Flying
           </label>
-          <label class="radio-inline">
-            <input type="radio" name="type" id="changemode-walking">Walking
-          </label>
-        </div>
+          </div>
+          </div>
         <div id="search-warning" class="modal fade">
           <div class="modal-dialog">
             <div class="modal-content">
@@ -53,10 +69,8 @@
             </div><!-- /.modal-content -->
           </div><!-- /.modal-dialog -->
         </div><!-- /.modal -->
-      <div>
         <h3>Places</h3>
         <div id="waypoints" class="list-group"><p class="text-center">Add some places to visit!</p></div>
-      </div>
       <button id="submit" type="submit" class="btn btn-default">Submit</button>
       </div>
       <div id="directions-panel"></div>

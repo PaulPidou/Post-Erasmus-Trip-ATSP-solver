@@ -24,6 +24,7 @@ html, body {
   width: 25%;
   text-align: left;
 }
+#pac-input {border-bottom-left-radius:0px; border-bottom-right-radius:0px;border-bottom:0px;}
 #left-panel input {font-size: 15px;}
 #search-warning {z-index: 50;}
 #waypoints .pull-right {display: none; cursor: pointer;}

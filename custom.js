@@ -89,7 +89,14 @@ function initMap() {
     document.getElementById('waypoints').innerHTML = text;
   }
 
-  autocomplete.addListener('place_changed', function() {setMarkers(autocomplete.getPlace())});
+  autocomplete.addListener('place_changed', function() {
+    if (locations.length < 8) {
+      setMarkers(autocomplete.getPlace())
+    } else {
+      $('#search-warning p').html('<span class="glyphicon glyphicon-exclamation-sign"></span> You can only select a maximum of eight locations.')
+      $('#search-warning').modal();
+    }
+  });
   
   // Sets a listener on a radio button to change the filter type on Places
   // Autocomplete.
@@ -100,7 +107,6 @@ function initMap() {
     });
   }
   setupClickListener('changemode-driving', google.maps.TravelMode.DRIVING);
-  setupClickListener('changemode-transit', google.maps.TravelMode.TRANSIT);
   setupClickListener('changemode-bicycling', google.maps.TravelMode.BICYCLING);
   setupClickListener('changemode-walking', google.maps.TravelMode.WALKING);
   
@@ -117,6 +123,19 @@ function initMap() {
       if ($(this).parent().attr('id') == locations[i][0] + '_' + locations[i][1] + '_' + locations[i][2]) {
         locations.splice(i, 1);
         break;
+      }
+    }
+    document.getElementById('directions-panel').innerHTML = '';
+    directionsDisplay.setDirections({routes: []});
+    if (locations.length > 0) {
+      classes = $(this).parent().attr('class').split(" ");
+      for (c of classes) {
+        if (c == "start") {
+          start_end[0] = locations[0][0] + '_' + locations[0][1] + '_' + locations[0][2];
+        }
+        if (c == "end") {
+          start_end[1] = locations[0][0] + '_' + locations[0][1] + '_' + locations[0][2];;
+        }
       }
     }
     setMarkers(undefined);
