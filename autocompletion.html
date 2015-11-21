@@ -22,10 +22,10 @@
       <div class="page-header text-uppercase text-center"><span class="glyphicon glyphicon-globe" aria-hidden="true"></span> Post-Erasmus Trip Project</div>
       <div id="search-panel">
         <input id="pac-input" type="text" class="form-control" placeholder="Add a location">
-          <div id="mode-selector" class="btn-group btn-group-justified" role="group" data-toggle="buttons">
+          <div id="mode-selector" class="btn-group btn-group-justified controls" role="group" data-toggle="buttons">
             <div class="btn-group" role="group">
-              <label class="btn btn-default active" style="width: 75%;border-top-left-radius:0px">
-                <input type="radio" name="type" id="changemode-driving" autocomplete="off" checked="checked"><span class="fa fa-car"></span>
+              <label class="btn btn-default active" style="width: 75%;border-top-left-radius:0px" id="changemode-driving">
+                <input type="radio" name="type" checked="checked"><span class="fa fa-car"></span>
               </label>
               <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="width: 26%;padding-left: 11%;padding-right: 11%;">
                 <span class="caret"></span>
@@ -37,18 +37,18 @@
               </ul>
             </div>
           <div class="btn-group" role="group">
-          <label class="btn btn-default">
-            <input type="radio" name="type" id="changemode-bicycling" autocomplete="off"><span class="fa fa-bicycle"></span>
+          <label class="btn btn-default" id="changemode-bicycling">
+            <input type="radio" name="type"><span class="fa fa-bicycle"></span>
           </label>
           </div>
           <div class="btn-group" role="group">
-          <label class="btn btn-default">
-            <input type="radio" name="type" id="changemode-walking" autocomplete="off"><span class="fa fa-male"></span>
+          <label class="btn btn-default" id="changemode-walking">
+            <input type="radio" name="type"><span class="fa fa-male"></span>
           </label>
           </div>
           <div class="btn-group" role="group">
           <label class="btn btn-default" style="border-top-right-radius:0px">
-            <input type="radio" name="type" id="changemode-walking" autocomplete="off"><span class="fa fa-plane"></span>
+            <input type="radio" name="type"><span class="fa fa-plane"></span>
           </label>
           </div>
           </div>
@@ -72,7 +72,7 @@
         </div><!-- /.modal -->
         <h3>Places</h3>
         <div id="waypoints" class="list-group"><p class="text-center">Add some places to visit!</p></div>
-      <button id="submit" type="submit" class="btn btn-default">Submit</button>
+      <button id="submit" type="submit" class="btn btn-default disabled">Go</button>
       </div>
       <div id="directions-panel"></div>
       </div>

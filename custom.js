@@ -28,6 +28,18 @@ function initMap() {
     markers = [];
   }
   
+  function enableSubmit() {
+    if (locations.length > 1) {
+      if($('#submit').hasClass('disabled')) {
+        $('#submit').removeClass('disabled');
+      }
+    } else {
+      if(!$('#submit').hasClass('disabled')) {
+        $('#submit').addClass('disabled');
+      }
+    }
+  }
+  
   function setMarkers(placeGet) {
     var place = placeGet;
     if (place == undefined) {
@@ -92,6 +104,7 @@ function initMap() {
   autocomplete.addListener('place_changed', function() {
     if (locations.length < 8) {
       setMarkers(autocomplete.getPlace())
+      enableSubmit();
     } else {
       $('#search-warning p').html('<span class="glyphicon glyphicon-exclamation-sign"></span> You can only select a maximum of eight locations.')
       $('#search-warning').modal();
@@ -113,7 +126,12 @@ function initMap() {
   directionsDisplay.setMap(map);
   
   document.getElementById('submit').addEventListener('click', function() {
-    calculateAndDisplayRoute(directionsService, directionsDisplay, travel_mode);
+    if ($('#submit').hasClass('disabled')) {
+      $('#search-warning p').html('<span class="glyphicon glyphicon-exclamation-sign"></span> You have to select at least two locations.')
+      $('#search-warning').modal();
+    } else {
+      calculateAndDisplayRoute(directionsService, directionsDisplay, travel_mode);
+    }
   });
   
   $(document).on('mouseenter', '#waypoints a', function() {$(this).addClass("selected");});
@@ -139,6 +157,7 @@ function initMap() {
       }
     }
     setMarkers(undefined);
+    enableSubmit();
   });
   
   function getElementWithAttribute(attribute, id) {
