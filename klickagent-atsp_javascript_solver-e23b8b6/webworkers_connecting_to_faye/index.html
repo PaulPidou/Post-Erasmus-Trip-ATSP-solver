@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<output id="result"></output>
+<br><br>
+
+<script>
+var w;
+
+function startWorker() {
+    if(typeof(Worker) !== "undefined") {
+        if(typeof(w) == "undefined") {
+            w = new Worker("job.js");
+        }
+        w.onmessage = function(event) {
+            document.getElementById("result").innerHTML = event.data;
+        };
+    } else {
+        document.getElementById("result").innerHTML = "Sorry! No Web Worker support.";
+    }
+}
+
+window.onload= function(){
+	startWorker();
+};
+</script>
+
+The result of this POC is visible in the console only: "Uncaught ReferenceError: document is not defined"
+
+</body>
+</html>

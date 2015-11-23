@@ -5,6 +5,7 @@ function initMap() {
   var directionsDisplay = new google.maps.DirectionsRenderer;
   var travel_mode = google.maps.TravelMode.DRIVING;
   
+  var toll = false, highway = false;
   var start_end = ['', ''];
   
   var map = new google.maps.Map(document.getElementById('map'), {
@@ -127,10 +128,20 @@ function initMap() {
   
   document.getElementById('submit').addEventListener('click', function() {
     if ($('#submit').hasClass('disabled')) {
-      $('#search-warning p').html('<span class="glyphicon glyphicon-exclamation-sign"></span> You have to select at least two locations.')
+      $('#search-warning p').html('<span class="glyphicon glyphicon-exclamation-sign"></span> You have to add at least two locations.')
       $('#search-warning').modal();
     } else {
-      calculateAndDisplayRoute(directionsService, directionsDisplay, travel_mode);
+      calculateAndDisplayRoute(directionsService, directionsDisplay, travel_mode, toll, highway);
+    }
+  });
+  
+  $('#mode-selector .dropdown-menu a').click(function() {
+    if ($(this).children().hasClass('display')) {
+      $(this).children().removeClass('display');
+      if ($(this).attr('id') == 'toll') {toll = false;} else {highway = false;}
+    } else {
+      $(this).children().addClass('display');
+      if ($(this).attr('id') == 'toll') {toll = true;} else {highway = true;}
     }
   });
   
@@ -211,7 +222,7 @@ function initMap() {
   });
 }
 
-function calculateAndDisplayRoute(directionsService, directionsDisplay, travel_mode) {
+function calculateAndDisplayRoute(directionsService, directionsDisplay, travel_mode, toll, highway) {
   var waypts = [];
   for (var i = 0; i < locations.length; i++) {
       waypts.push({
@@ -225,6 +236,8 @@ function calculateAndDisplayRoute(directionsService, directionsDisplay, travel_m
     destination: document.getElementsByClassName('end')[0].textContent,
     waypoints: waypts,
     optimizeWaypoints: true,
+    avoidHighways: highway,
+    avoidTolls: toll,
     travelMode: travel_mode
   }, function(response, status) {
     if (status === google.maps.DirectionsStatus.OK) {
@@ -246,4 +259,101 @@ function calculateAndDisplayRoute(directionsService, directionsDisplay, travel_m
       $('#route-warning').modal();
     }
   });
+}
+var resultPaths = [];
+$("#rome2rio").click(function(){
+    link = "http://free.rome2rio.com/api/1.2/json/Search?key=XRpzZBCX&oName=London&dName=Paris";
+    $.getJSON(link, function(data) {
+        for(var i = 0; i < data.routes.length; i++) {
+          console.log(i.toString() + ' ' + routes[i].distance + ' ' + routes[i].duration + ' ' + routes[i].indicativePrice.price + ' ' + routes[i].indicativePrice.currency);
+          path = [i, routes[i].distance, routes[i].duration, routes[i].indicativePrice.price, routes[i].indicativePrice.currency];
+          resultPaths.push(path);
+        }
+    });
+});
+
+function orderByFatest(routes) {
+  var routesSorted = routes;
+  routesSorted.sort(function(a, b) {
+    if (a.duration > b.duration)
+      return 1;
+    if (a.duration < b.duration)
+      return -1;
+    return 0;
+  });
+  return routesSorted;
+}
+
+function orderByShortest(routes) {
+  var routesSorted = routes;
+  routesSorted.sort(function(a, b) {
+    if (a.distance > b.distance)
+      return 1;
+    if (a.distance < b.distance)
+      return -1;
+    return 0;
+  });
+  return routesSorted;
+}
+
+function orderByCheapest(routes) {
+  var routesSorted = routes;
+  routesSorted.sort(function(a, b) {
+    if (a.indicativePrice.price > b.indicativePrice.price)
+      return 1;
+    if (a.indicativePrice.price < b.indicativePrice.price)
+      return -1;
+    return 0;
+  });
+  return routesSorted;
+}
+
+function findWeightByMode(dataGot, orderMode) {
+  var routesPickedA, routesPickedB;
+  var valueA, valueB;
+  var pairs = [];
+  for (var i = 0; i < dataGot.length; i++) {
+    for (var j = 0; j < dataGot.length; j++) {
+      if (dataGot[i][0] == dataGot[j][1] && dataGot[j][0] == dataGot[i][1]) {
+        if (oderMode == "fatest") {
+          routesPickedA = orderByFatest(dataGot[i][2].routes);
+          routesPickedB = orderByFatest(dataGot[j][2].routes);
+          valueA = routesPickedA[0].duration;
+          valueB = routesPickedB[0].duration;
+        } else if (orderMode == "shortest") {
+          routesPickedA = orderByShortest(dataGot[i][2].routes);
+          routesPickedB = orderByShortest(dataGot[j][2].routes);
+          valueA = routesPickedA[0].distance;
+          valueB = routesPickedB[0].distance;
+        } else if (orderMode == "cheapest") {
+          routesPickedA = orderByCheapest(dataGot[i][2].routes);
+          routesPickedB = orderByCheapest(dataGot[j][2].routes);
+          valueA = routesPickedA[0].indicativePrice.price;
+          valueB = routesPickedB[0].indicativePrice.price;
+        } else {return null;}
+        if (valueA < valueB) {
+          pairs.push([dataGot[i][0], dataGot[i][1], valueB]);
+        } else {
+          pairs.push([dataGot[i][0], dataGot[i][1], valueA]);
+        }
+      }
+    }
+  }
+  return pairs;
+}
+
+function handleTSP(locations) {
+  var dataGot = [];
+  for(var i = 0; i < locations.length; i++) {
+    for(var j = 0; j < locations.length; j++) {
+      if (i != j) {
+        link = "http://free.rome2rio.com/api/1.2/json/Search?key=XRpzZBCX&oName=" + locations[i][0] + "&oPos=" + locations[i][1] + "," + locations[i][2] + "&oKind=city&dName=" + locations[j][0] + "&dPos=" + locations[j][1] + "," + locations[j][2] + "&dKind=city&currencyCode=EUR";
+        oId = locations[i][0] + '_' +  locations[i][1] + '_' + locations[i][2];
+        dId = locations[j][0] + '_' +  locations[j][1] + '_' + locations[j][2];
+        $.getJSON(link, function(data) {
+          dataGot.push([oId, dId, data]);
+        });
+      }
+    }
+  }
 }

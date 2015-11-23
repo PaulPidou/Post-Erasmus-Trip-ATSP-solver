@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>TSP JS algorithms</title>
+
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+	
+
+
+	<script src="jquery.min.js"></script>
+	
+	
+	
+	
+	<script src="http://yourserver.com:8888/socket.io/socket.io.js" id="socketscripts"></script>
+	<script src="app/javascript/socketio/client/q.js"></script>
+	<script src="app/javascript/socketio/client/client.js"></script>
+	
+	<script src="application.js"></script>
+	
+	<script src="app/javascript/TSP.js"></script>
+	<script src="app/javascript/TSP_Solver.js"></script>
+	<script src="app/javascript/TSP_Solver_Worker.js"></script>
+	
+
+
+	<link rel="stylesheet" href="bootstrap/bootstrap.min.css">
+	<link rel="stylesheet" href="bootstrap/bootstrap-theme.min.css">
+	<script src="bootstrap/bootstrap.min.js"></script>
+	
+	
+	<link rel="stylesheet" href="application.css">
+</head>
+<body>
+
+
+		<div class="connecting">
+			connecting to server... please wait
+		</div>
+
+		<!--<h1>Rechner für das asymmetrische Travelling Salesman Problem</h1>-->
+		<h1>Asymmetric travelling salesman problem solver</h1>
+		
+		<form onsubmit="document.getElementById('performButton').disabled=true;runInvariant($('#algorithm_type').val(),$('#execution_type').val());return false;">
+			<!--<button onclick="tsp_instance.detectPerformance();">performance</button>-->
+			
+			<div>
+				<div class="row">
+				  <div class="col-md-6">
+				  
+				  	<h3>Specify Waypoints</h3>
+				  	
+				  	<label for="distanceMatrix">Enter distance matrix</label><br/>
+				  	<div id="distanceMatrix" name="distanceMatrix" onclick="$(this).hide();$('#inputDistanceMatrix').show().focus();"><pre><code id="distanceMatrix_c"></code></pre></div>
+				  	<textarea id="inputDistanceMatrix" onchange="if(this.value==''){$('#distanceMatrix_c').html('enter distance matrix here');} else {$('#distanceMatrix_c').html(jsonFormat(this.value));distanceTable=JSON.parse(this.value);}" onblur="$(this).hide();$('#distanceMatrix').show();"></textarea>
+				  	
+				  	<h4>or</h4>
+				  	
+				  	<label for="generateWP">Generate random distance matrix for # Waypoints</label>
+				  	<input id="test_waypoints_count" name="generateWP" value="" type="number" placeholder="generate random distance matrix with # waypoints" onchange="$(this).addClass('loading');generateRandomWaypoints(this,function(o,size,dtable){$('#inputDistanceMatrix').val(JSON.stringify(distanceTable));if(size <= 50 ) $('#distanceMatrix_c').html(jsonFormat(JSON.stringify(distanceTable))); else $('#distanceMatrix_c').html('no preview for matrices bigger than 50x50'); $(o).removeClass('loading');});" class="form-control"/>
+				  
+				  
+				  </div>
+				  <div class="col-md-6">
+				  	<h3>Specify Algorithm</h3>
+				  
+				  	<label for="algo">Algorithm</label>
+				  	<select id="algorithm_type" name="algo" class="form-control" required>
+				  		<option value="" data-allowed="true">select Algorithm</option>
+				  		<option value="BruteForce" data-allowed="['normal','singlethread','server']">BruteForce</option>
+				  		<option value="Bnb" data-allowed="true">Branch and Bound</option>
+				  		<option value="Dynamic" data-allowed="['normal','singlethread','server']">Dynamic</option>
+				  		<option value="K3" data-allowed="['normal','singlethread','server']">K3</option>
+				  		<option value="AntColonyK2"  data-allowed="['normal','singlethread','server']">Ant Colony K2</option> 
+				  		<option value="AntColonyK2_K3"  data-allowed="['normal','singlethread','server']">Ant Colony and K3</option> 
+				  		<option value="NearestNeighbour" data-allowed="['normal','singlethread','server']">Nearest Neighbour</option>
+				  		
+				  	</select>
+				  	
+				  	<label for="type">Execution type</label>
+				  	<select id="execution_type" name="type" class="form-control" required>
+				  		<option value="" data-allowed="true">select Execution type</option>
+				  		<option value="normal"  data-allowed="true">Normal</option>
+				  		<option value="singlethread" data-allowed="true">Worker Thread</option>
+				  		<option value="webworker" value data-allowed="['bnb']" data-threads="true">Multithreaded</option>
+				  		<option value="server" data-allowed="true" data-server="true">Server</option>
+				  		<option value="server_multithread" data-allowed="['bnb']" data-threads="true" data-server="true">Server multiprocess</option>
+				  		<option value="client_distributed" data-allowed="['bnb']" data-server="true">Distributed Client</option>
+				  		<!--<option value="server_distributed" data-allowed="[bnb]">Distributed Server</option>
+				  		<option value="client_server_distributed" data-allowed="[bnb]">Distributed Client/Server</option>-->
+				  	</select>
+				  	<input type="text" id="threadCount" value="" placeholder="enter max thread/process count"/>
+				  	
+				  	<br/><br/>
+				  	
+				  	<!--<button type="submit" onclick="document.getElementById('performButton').disabled=true;runInvariant($('#algorithm_type').val(),$('#execution_type').val());" id="performButton" class="btn btn-default">Calculate</button>-->
+				  	<input type="submit" onclick="" id="performButton" class="btn btn-default" value="Calculate"/>
+				  	<button onclick="tsp_instance.stop();" id="stopButton" disabled="true" class="btn">stop</button>
+				  
+				  
+				  </div>
+				</div>
+			</div>
+			
+			<br/>
+			<br/>
+			
+			<div class="col-md-9">
+				<hr/>
+				<h3>Results</h3>
+				<div id="log"></div>
+				
+			</div>
+			
+			
+			<div class="col-md-3">
+				<hr/>
+				<h3>Distributed Log</h3>
+				<div id="log_distributed"></div>
+			</div>
+			
+		</form>
+		
+	
+		
+	
+</body>
+</html>

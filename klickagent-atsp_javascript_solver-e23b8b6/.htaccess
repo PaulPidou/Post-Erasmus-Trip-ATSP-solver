@@ -1,0 +1,12 @@
+
+RewriteEngine on
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+RewriteRule ^(.*)tsp_solver/app/javascript/TSP\.js$ tsp_solver/TSP.js [L]
+RewriteRule ^(.*)tsp_solver/app/javascript/TSP_Solver\.js$ tsp_solver/TSP_Solver.js [L]
+RewriteRule ^(.*)tsp_solver/app/javascript/TSP_Solver_Worker\.js$ tsp_solver/TSP_Solver_Worker.js [L]
+
+
+RewriteRule ^(.*)app/javascript/socketio/client/q\.js$ socketio/client/q.js [L]
+RewriteRule ^(.*)app/javascript/socketio/client/client\.js$ socketio/client/client.js [L]

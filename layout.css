@@ -26,6 +26,8 @@ html, body {
 }
 #pac-input {border-bottom-left-radius:0px; border-bottom-right-radius:0px;border-bottom:0px;}
 #left-panel input {font-size: 15px;}
+#toll span, #highway span {display: none;}
+#toll span.display, #highway span.display {display: inline;}
 #search-warning {z-index: 50;}
 #waypoints .pull-right {display: none; cursor: pointer;}
 #waypoints .selected {background-color: #f5f5f5;}

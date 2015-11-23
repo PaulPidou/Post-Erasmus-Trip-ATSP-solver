@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<p>Count numbers: <output id="result"></output></p>
+<button onclick="startWorker()">Start Worker</button> 
+<button onclick="stopWorker()">Stop Worker</button>
+<br><br>
+
+<script>
+var w;
+
+
+//http://stackoverflow.com/questions/17587019/sharedworker-not-working-much-less-sharing
+function startWorker() {
+    if(typeof(SharedWorker) !== "undefined") {
+    	
+        if(typeof(w) == "undefined") {
+        	var namespace = { 'test' : {elem1: true,elem2:false}};
+        	
+            w = new SharedWorker('job.js',namespace);
+            console.log(w);
+            
+            w.port.addEventListener("message",function(event) {
+                document.getElementById("result").innerHTML = event.data;
+            }, false );
+            
+            w.port.start();
+	    }
+	    w.port.postMessage('ba');
+        
+    } else {
+        document.getElementById("result").innerHTML = "Sorry! No Shared Worker support.";
+    }
+}
+
+function stopWorker() { 
+    w.port.terminate();
+    w = undefined;
+}
+</script>
+
+</body>
+</html>

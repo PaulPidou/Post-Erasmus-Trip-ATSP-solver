@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<p>Count numbers: <output id="result"></output></p>
+<button onclick="startWorker()">Start Worker</button> 
+<div id="stopButtons"></div>
+
+<br><br>
+
+<script>
+var workers = [];
+function startWorker() {
+	if(typeof(Worker) !== "undefined") {
+		
+		var onMessageReceived = function(i){
+			workers[i].onmessage = function(event) {
+				document.getElementById("result_"+i).innerHTML = event.data;
+			};
+		};
+		
+		var resultDivs = '',stopButtons='';
+		for( var i in [0,1,2] ){
+			
+			resultDivs+='<div id="result_'+i+'"></div>';
+			stopButtons+='<button onclick="stopWorker('+i+')">Stop Worker '+i+'</button>';
+			
+			if(typeof(workers[i]) == "undefined") {
+				workers[i] = new Worker("job.js");
+			}
+			onMessageReceived(i);
+		}
+		document.getElementById("result").innerHTML=resultDivs;
+		document.getElementById("stopButtons").innerHTML=stopButtons;
+	} else {
+		document.getElementById("result").innerHTML = "Sorry! No Web Worker support.";
+	}
+}
+
+function stopWorker(i) { 
+	workers[i].terminate();
+	workers[i] = undefined;
+}
+</script>
+
+</body>
+</html>

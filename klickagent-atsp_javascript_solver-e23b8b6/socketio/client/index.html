@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Distributed client system</title>
+	
+
+</head>
+<body>
+	<div id="client_id"></div><br/>
+	
+	<!--<button onclick="distributedSystem.togglePause();this.innerHTML=(distributedSystem.isPaused())?'resume':'pause';">pause</button>-->
+	
+	<button onclick="distributedSystem.startJob(2,'permuteExample',[{x:'abc'},{x:'cde'}]);">start Job</button><div style="display: inline;" id="acquiredWorkers"></div>
+	<br/><br/>Distributes a sample calculation to two clients (slaves).<br/>(The calculations are for demonstration purpose only, whereas both clients perform the same calculation)<br/><br/>
+	Open this page in three different browser windows, and click "start job" in one of the windows.<br/>
+	<ul>
+		<li>when shared data is received the message "shared data reveiced {DATA} and redistributing..." appears</li>
+		<li>as soon as a client (slave) finishes its calculation the message "worker {WORKER ID} finished" appears</li>
+		<li>"job completed" means that all clients (slaves) finished the calculation</li>
+	</ul>
+
+	<h3>Activity</h3>
+	<div id="log"></div>
+
+
+	<script src="http://yourserver.com:8888/socket.io/socket.io.js"></script>
+	<script src="q.js"></script>
+	<script src="client.js"></script>
+	
+	<script>
+		distributedSystem.addJob( 'permuteExample',{
+			start: function(ds,opts){
+				console.log(opts);
+				logToScreen( 'starting job', opts );
+			
+				//algorithm
+				var permArr = [], usedChars = [];
+				var len;
+				function permute(deferred,input,r) {
+					if( typeof r === 'undefined' ){
+						len = input.length;
+						var i, ch;
+					}
+						
+					for (i = 0; i < input.length; i++) {
+						ch = input.splice(i, 1)[0];
+						len--;
+						usedChars.push(ch);
+						if (input.length == 0) {
+							permArr.push(usedChars.slice());
+						}
+						permute(deferred,input,true);
+						input.splice(i, 0, ch);
+						len++;
+						usedChars.pop();
+					}
+					
+					setTimeout(function(){
+						deferred.notify( permArr );
+					},100);
+					return permArr;
+				};
+				
+				var deferred = Q.defer();
+			
+			
+				var arr = [];
+				for(var i = 0 ; i < 1 ; i++ ){
+					arr.push(i); //[i,i+1]
+				};
+				//deferred.notify( arr );
+				var permutations = permute(deferred,arr);
+				
+				
+				setTimeout(function(){
+					console.log('resolve');
+					//deferred.reject(permutations);
+					deferred.resolve(permutations);
+				},5000);
+				
+				return deferred.promise;
+				
+			},
+			sharedData: function(ds,data){
+				logToScreen( 'shared data reveiced ' + JSON.stringify( data ) + '' );
+				console.log('shared data received in custom function');
+			},
+			sharedDataOnMaster: function(ds,data){
+				logToScreen( 'shared data reveiced ' + JSON.stringify( data ) + ' and redistributing...' );
+			},
+			jobPartEnd: function(ds,sender_id){
+				logToScreen( 'worker ' + sender_id + ' finished' );
+			},
+			jobEnd: function(ds,data){
+				logToScreen( 'job completed' );
+			},
+			clientBusy: function(ds){
+				logToScreen('jobs requested, but already busy!');
+			},
+			unavailable: function(ds,data){
+				logToScreen( 'distributed system is unavailable' );
+			},
+			
+		});
+		
+		document.body.onload = function(event) {
+			document.getElementById('client_id').innerHTML = distributedSystem.client_id;
+		};
+	
+	</script>
+		
+</body>
+</html>

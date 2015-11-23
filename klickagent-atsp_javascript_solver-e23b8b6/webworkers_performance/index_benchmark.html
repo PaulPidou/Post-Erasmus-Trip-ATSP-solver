@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" >
+ 
+	<title>test</title>
+	
+	
+</head>
+ 
+<body>
+ 	<input type="number" id="counts" placeholder="# of execution"/>
+ 	<br/>
+ 	
+ 	<a href="javascript:;" onclick="local();">direct</a>&nbsp;&nbsp;<span id="ts_normal"></span><br/>
+ 
+ 	<br/>
+ 	<a href="javascript:;" onclick="createWebworker();">measure webworker creation time (including commincation and confirmation)</a>&nbsp;&nbsp;<span id="ts_webworker_creation"></span><br/>
+ 	<a href="javascript:;" onclick="createWebworkerFromFile();">measure webworker (file) creation time (including commincation and confirmation)</a>&nbsp;&nbsp;<span id="ts_webworker_creation_file"></span><br/>
+ 	
+ 	<br/>
+ 	<a href="javascript:;" onclick="communication();">measure webworker communication time</a>&nbsp;&nbsp;<span id="ts_webworker_comminication"></span><br/>
+ 	<a href="javascript:;" onclick="communciationFile();">measure webworker (file) communication time</a>&nbsp;&nbsp;<span id="ts_webworker_comminication_file"></span><br/>	
+ 
+ 	<h3>Results</h3>
+ 	<table id="results">
+ 	</table>
+ 	
+ 	
+ 	<h3>misc</h3>
+ 	<a href="javascript:;" onclick="runWebworker();">run calculation in webworker</a>&nbsp;&nbsp;<span id="ts_webworker"></span><br/>
+ 	<a href="javascript:;" onclick="runWebworkerFromFile();">run calculation in webworker (file)</a>&nbsp;&nbsp;<span id="ts_webworker_file"></span><br/>
+ 	
+ 	
+ 	<script id="webworker">
+ 		self.onmessage = function(e) {
+ 		  var res = eval(e.data.cmd)(e.data.args);
+ 		  postMessage(res);
+ 		};
+ 	    function run(){
+ 	    	var i = 0;
+ 	    	setInterval(function() {
+ 	       		i++;
+ 	        	postMessage(i); // sent data to main app
+ 	    	}, 500);
+ 	    };
+ 	    var permArr = [], usedChars = [];
+ 	    var len;
+ 	    function permute(input,r) {
+ 	    	if( typeof r === 'undefined' ){
+ 	    		len = input.length;
+ 	    		var i, ch;
+ 	    	}
+ 	        
+ 	        for (i = 0; i < input.length; i++) {
+ 	            ch = input.splice(i, 1)[0];
+ 	            len--;
+ 	            usedChars.push(ch);
+ 	            if (input.length == 0) {
+ 	                permArr.push(usedChars.slice());
+ 	            }
+ 	            permute(input,true);
+ 	            input.splice(i, 0, ch);
+ 	            len++;
+ 	            usedChars.pop();
+ 	        }
+ 	        return permArr;
+ 	    };
+ 	    
+ 	    function permuteExample(){
+ 	    	var arr = [];
+ 	    	for(var i = 0 ; i < 6 ; i++ ){
+ 	    		arr.push(i); //[i,i+1]
+ 	    	};
+ 	    	var permutations = permute(arr);
+ 	    	return permutations;
+ 	    	
+ 	    }; 
+ 	    
+ 	    
+ 	    function confirm(){
+ 	    	postMessage('confirm');
+ 	    }
+ 	    
+ 	</script>
+ 	
+ 	<script id="webworker_roundtrip">
+ 		self.onmessage = function(e) {
+ 		  postMessage({state:'ok'});
+ 		};
+ 	</script>
+ 	
+ 	
+ 	<script>
+ 	
+ 		//changed new Date().getTime() to window.performance.now()
+ 	
+ 		function local(){
+ 		
+ 			var c = parseInt(document.getElementById('counts').value);
+ 		
+ 			for ( var i = 0; i < c ; i ++ ){
+ 		
+ 				var start = window.performance.now();
+ 			
+ 				var data = permuteExample();
+ 				var end = window.performance.now();
+ 				var time = end - start;
+ 				
+ 				log_callback(i,time);
+ 				
+ 				//document.getElementById('ts_normal').innerHTML='Execution time: ' + time + ' ms';
+ 			}
+ 		}
+ 	
+ 		function runWebworker(){
+ 		
+ 		    var URL = window.URL || (window.webkitURL);
+ 		
+ 		    window.URL = URL;
+ 		
+ 		    var workerData = new Blob([document.getElementById('webworker').textContent], {
+ 		        type: "text/javascript"
+ 		    });
+ 		    
+ 		    var start = window.performance.now();
+ 		    
+ 		    worker = new Worker(window.URL.createObjectURL(workerData));
+ 		    worker.postMessage({ 'cmd': 'permuteExample' });
+ 		    worker.onmessage = function (e) {
+ 		    	console.log(e.data);
+ 		    	var end = window.performance.now();
+ 		    	var time = end - start;
+ 		    	document.getElementById('ts_webworker').innerHTML='Execution time: ' + time + ' ms';
+ 		    };
+ 		   	
+ 		};
+ 		
+ 		function runWebworkerFromFile(){
+ 		
+ 		    var start = window.performance.now();
+ 		    
+ 		    worker = new Worker('webworker.js');
+ 		    worker.postMessage({ 'cmd': 'permuteExample' });
+ 		    worker.onmessage = function (e) {
+ 		    	console.log(e.data);
+ 		    	var end = window.performance.now();
+ 		    	var time = end - start;
+ 		    	document.getElementById('ts_webworker_file').innerHTML='Execution time: ' + time + ' ms';
+ 		    };
+ 		   	
+ 		};
+ 		
+ 		
+ 		
+ 		
+ 		function createWebworker(count){
+ 			
+ 			var max = parseInt(document.getElementById('counts').value);
+ 			var c = (typeof count !== 'undefined') ? count : max;
+ 			
+ 			var start = window.performance.now();
+ 			var workerData = new Blob([document.getElementById('webworker_roundtrip').textContent], {
+ 			    type: "text/javascript"
+ 			});
+ 			var worker = new Worker(window.URL.createObjectURL(workerData));
+ 			worker.postMessage({ 'cmd': 'confirm' });
+ 			worker.onmessage = function (e) {
+ 				worker.terminate();
+ 				delete worker;
+ 				var end = window.performance.now();
+ 				var time = end - start;
+ 				log_callback(max-c,time);
+ 				if( c > 1 )
+ 					window.setTimeout(function(){ createWebworker(c-1); },1);
+ 				//document.getElementById('ts_webworker_creation').innerHTML='Creation took: ' + time + ' ms';
+ 			};
+			 		
+			 			
+			 		
+ 		};
+ 		
+ 		function createWebworkerFromFile(count){
+ 			
+ 			var max = parseInt(document.getElementById('counts').value);
+ 			var c = (typeof count !== 'undefined') ? count : max;
+ 			
+ 			
+ 			var start = window.performance.now();
+ 			var worker = new Worker('roundtrip.js');
+ 			worker.postMessage({ 'cmd': 'confirm' });
+ 			worker.onmessage = function (e) {
+ 				worker.terminate();
+ 				delete worker;
+ 				var end = window.performance.now();
+ 				var time = end - start;
+ 				
+ 				log_callback(max-c,time);
+ 				if( c > 1 )
+ 					window.setTimeout(function(){ createWebworker(c-1); },1);
+ 				//document.getElementById('ts_webworker_creation_file').innerHTML='Creation took: ' + time + ' ms';
+ 			};
+ 		};
+ 		
+ 		
+ 		function communication(count){
+ 			
+ 			var max = parseInt(document.getElementById('counts').value);
+ 			var c = (typeof count !== 'undefined') ? count : max;
+ 			
+ 			var start;
+ 			var workerData = new Blob([document.getElementById('webworker_roundtrip').textContent], {
+ 			    type: "text/javascript"
+ 			});
+ 			var worker = new Worker(window.URL.createObjectURL(workerData));
+ 			worker.onmessage = function (e) {
+ 				var end = window.performance.now();
+ 				var time = end - start;
+ 				log_callback(max-c,time);
+ 				worker.terminate();
+ 				delete worker;
+ 				if( c > 1 )
+ 					window.setTimeout(function(){ createWebworker(c-1); },1);
+ 				//document.getElementById('ts_webworker_comminication').innerHTML='Communication took: ' + time + ' ms';
+ 			};
+ 			
+ 			
+ 			var max = parseInt(document.getElementById('counts').value);
+ 			var c = (typeof count !== 'undefined') ? count : max;
+ 			
+ 			start = window.performance.now();
+ 			worker.postMessage({ 'cmd': 'confirm' });
+ 		};
+ 		
+ 		function communciationFile(count){
+ 			
+ 			var max = parseInt(document.getElementById('counts').value);
+ 			var c = (typeof count !== 'undefined') ? count : max;
+ 			
+ 			var start;
+ 			var worker = new Worker('roundtrip.js');
+ 			worker.onmessage = function (e) {
+ 				var end = window.performance.now();
+ 				var time = end - start;
+ 				log_callback(max-c,time);
+ 				worker.terminate();
+ 				delete worker;
+ 				if( c > 1 )
+ 					window.setTimeout(function(){ createWebworker(c-1); },1);
+ 				//document.getElementById('ts_webworker_comminication_file').innerHTML='Communication took: ' + time + ' ms';
+ 			};
+ 			
+ 			var max = parseInt(document.getElementById('counts').value);
+ 			var c = (typeof count !== 'undefined') ? count : max;
+ 				
+ 				
+ 			start = window.performance.now();
+ 			worker.postMessage({ 'cmd': 'confirm' });
+ 		};
+ 		
+ 		
+ 		var is_object = function(someVar){
+ 			return (Object.prototype.toString.call( someVar ) === '[object Object]');
+ 		};
+ 		
+ 		
+ 		var table = document.getElementById('results');
+ 		var log_callback = function(j,time){
+ 			// Create an empty <tr> element and add it to the 1st position of the table:
+ 			var row = table.insertRow(j);
+ 			
+ 			// Insert new cells (<td> elements) at the 1st and 2nd position of the "new" <tr> element:
+ 			//var cell1 = row.insertCell(0);
+ 			var cell2 = row.insertCell(0);
+ 			
+ 			// Add some text to the new cells:
+ 			//cell1.innerHTML = j+1;
+ 			cell2.innerHTML = time;
+ 		
+ 		};
+ 	</script>
+ 	
+</body>
+ 
+</html>
