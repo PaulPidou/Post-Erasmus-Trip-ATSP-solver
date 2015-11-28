@@ -181,7 +181,8 @@ function initMap() {
     ["cheapest", "fatest", "shortest"].forEach(function(value) {
       matrices.push(handler.getMatrix(value));
     });
-    //console.log(matrices);
+    //console.log(handler.data);
+    console.log(handler.indexes);
         
     var solver = new ATSP();
     for (var i = 0; i < matrices.length; i++) {

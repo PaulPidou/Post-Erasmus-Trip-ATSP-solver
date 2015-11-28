@@ -1,10 +1,21 @@
 API_handler = function() {
     this.data;
-    //this.resultPaths = [];
+    this.indexes = {
+        cheapest: [],
+        fatest: [],
+        shortest: []
+    };
+}
+
+Array.prototype.indexOfName = function(name) {
+    for (var i = 0; i < this.length; i++)
+        if (this[i].name === name)
+            return i;
+    return -1;
 }
 
 API_handler.prototype.orderByFatest = function(routes) {
-  var routesSorted = routes;
+  var routesSorted = routes.slice();
   routesSorted.sort(function(a, b) {
     if (a.duration > b.duration)
       return 1;
@@ -16,7 +27,7 @@ API_handler.prototype.orderByFatest = function(routes) {
 }
 
 API_handler.prototype.orderByShortest = function(routes) {
-  var routesSorted = routes;
+  var routesSorted = routes.slice();
   routesSorted.sort(function(a, b) {
     if (a.distance > b.distance)
       return 1;
@@ -28,7 +39,7 @@ API_handler.prototype.orderByShortest = function(routes) {
 }
 
 API_handler.prototype.orderByCheapest = function(routes) {
-  var routesSorted = routes;
+  var routesSorted = routes.slice();
   routesSorted.sort(function(a, b) {
     if (a.indicativePrice.price > b.indicativePrice.price)
       return 1;
@@ -44,7 +55,7 @@ API_handler.prototype.getMatrix = function(orderMode) {
   var value;
   var matrix = [];
   for (var i = 0; i < this.data.length; i++) {
-    var elem = [];
+    var elem = [], index = [];
     for (var j = 0; j < this.data[i].length; j++) {
         if (orderMode == "fatest") {
           routesPicked = this.orderByFatest(this.data[i][j][2].routes);
@@ -56,6 +67,7 @@ API_handler.prototype.getMatrix = function(orderMode) {
           routesPicked = this.orderByCheapest(this.data[i][j][2].routes);
           value = routesPicked[0].indicativePrice.price;
         } else {return null;}
+        index.push([this.data[i][j][0], this.data[i][j][1], this.data[i][j][2].routes.indexOfName(routesPicked[0].name)]);
         if (i == j) {
             elem.push([this.data[i][j][0], this.data[i][j][0], 0]);
         }
@@ -65,6 +77,7 @@ API_handler.prototype.getMatrix = function(orderMode) {
         elem.push([this.data[i][0][0], this.data[i][0][0], 0]);
     }
     matrix.push(elem);
+    this.indexes[orderMode].push(index);
   }
   return matrix;
 }
