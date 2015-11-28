@@ -171,42 +171,6 @@ function initMap() {
     enableSubmit();
   });
   
-  function getElementWithAttribute(attribute, id) {
-    var allElements = document.getElementsByTagName('*');
-    for (var i = 0, n = allElements.length; i < n; i++) {
-      if (allElements[i].getAttribute(attribute) == id) {
-        return allElements[i];
-      }
-    }
-    return null;
-  }
- 
-  function getId(ev) {
-    var target = $(ev.target);
-    var id = target.parent().attr('id');
-    element = getElementWithAttribute('aria-describedby', id);
-    return element.closest('a').id;
-  }
-
-  $('body').popover({selector: '[data-popover]', trigger: 'manual', animation: false})
-    .on('mouseenter', '#waypoints a .settings' , function () {
-      var _this = this;
-      $(_this).popover('show');
-      $('body').on('mouseenter', '.popover', function(ev) {
-        document.getElementById(getId(ev)).className += " selected";
-      }).on('mouseleave', '.popover', function () {
-        $(_this).popover('destroy');
-        $(_this).parent().removeClass("selected");
-      });
-    }).on('mouseleave', '#waypoints a .settings', function () {
-      var _this = this;
-      setTimeout(function () {
-          if (!$(".popover:hover").length) {
-              $(_this).popover('destroy');
-          }
-      }, 100);
-    });
-    
   $(document).on('click', '.popover .list-group a', function(ev) {
     var target = $(ev.target);
     element = getElementWithAttribute('aria-describedby', target.closest('.popover').attr('id'));
@@ -219,6 +183,10 @@ function initMap() {
       $('#waypoints a').removeClass('end');
       document.getElementById(start_end[1]).className += ' end';
     }
+  });
+  
+  $("#rome2rio").click(function(){
+    handleTSP(locations);
   });
 }
 
@@ -260,100 +228,39 @@ function calculateAndDisplayRoute(directionsService, directionsDisplay, travel_m
     }
   });
 }
-var resultPaths = [];
-$("#rome2rio").click(function(){
-    link = "http://free.rome2rio.com/api/1.2/json/Search?key=XRpzZBCX&oName=London&dName=Paris";
-    $.getJSON(link, function(data) {
-        for(var i = 0; i < data.routes.length; i++) {
-          console.log(i.toString() + ' ' + routes[i].distance + ' ' + routes[i].duration + ' ' + routes[i].indicativePrice.price + ' ' + routes[i].indicativePrice.currency);
-          path = [i, routes[i].distance, routes[i].duration, routes[i].indicativePrice.price, routes[i].indicativePrice.currency];
-          resultPaths.push(path);
-        }
+
+function getElementWithAttribute(attribute, id) {
+  var allElements = document.getElementsByTagName('*');
+  for (var i = 0, n = allElements.length; i < n; i++) {
+    if (allElements[i].getAttribute(attribute) == id) {
+      return allElements[i];
+    }
+  }
+  return null;
+}
+
+function getId(ev) {
+  var target = $(ev.target);
+  var id = target.parent().attr('id');
+  element = getElementWithAttribute('aria-describedby', id);
+  return element.closest('a').id;
+}
+
+$('body').popover({selector: '[data-popover]', trigger: 'manual', animation: false})
+  .on('mouseenter', '#waypoints a .settings' , function () {
+    var _this = this;
+    $(_this).popover('show');
+    $('body').on('mouseenter', '.popover', function(ev) {
+      document.getElementById(getId(ev)).className += " selected";
+    }).on('mouseleave', '.popover', function () {
+      $(_this).popover('destroy');
+      $(_this).parent().removeClass("selected");
     });
-});
-
-function orderByFatest(routes) {
-  var routesSorted = routes;
-  routesSorted.sort(function(a, b) {
-    if (a.duration > b.duration)
-      return 1;
-    if (a.duration < b.duration)
-      return -1;
-    return 0;
-  });
-  return routesSorted;
-}
-
-function orderByShortest(routes) {
-  var routesSorted = routes;
-  routesSorted.sort(function(a, b) {
-    if (a.distance > b.distance)
-      return 1;
-    if (a.distance < b.distance)
-      return -1;
-    return 0;
-  });
-  return routesSorted;
-}
-
-function orderByCheapest(routes) {
-  var routesSorted = routes;
-  routesSorted.sort(function(a, b) {
-    if (a.indicativePrice.price > b.indicativePrice.price)
-      return 1;
-    if (a.indicativePrice.price < b.indicativePrice.price)
-      return -1;
-    return 0;
-  });
-  return routesSorted;
-}
-
-function findWeightByMode(dataGot, orderMode) {
-  var routesPickedA, routesPickedB;
-  var valueA, valueB;
-  var pairs = [];
-  for (var i = 0; i < dataGot.length; i++) {
-    for (var j = 0; j < dataGot.length; j++) {
-      if (dataGot[i][0] == dataGot[j][1] && dataGot[j][0] == dataGot[i][1]) {
-        if (oderMode == "fatest") {
-          routesPickedA = orderByFatest(dataGot[i][2].routes);
-          routesPickedB = orderByFatest(dataGot[j][2].routes);
-          valueA = routesPickedA[0].duration;
-          valueB = routesPickedB[0].duration;
-        } else if (orderMode == "shortest") {
-          routesPickedA = orderByShortest(dataGot[i][2].routes);
-          routesPickedB = orderByShortest(dataGot[j][2].routes);
-          valueA = routesPickedA[0].distance;
-          valueB = routesPickedB[0].distance;
-        } else if (orderMode == "cheapest") {
-          routesPickedA = orderByCheapest(dataGot[i][2].routes);
-          routesPickedB = orderByCheapest(dataGot[j][2].routes);
-          valueA = routesPickedA[0].indicativePrice.price;
-          valueB = routesPickedB[0].indicativePrice.price;
-        } else {return null;}
-        if (valueA < valueB) {
-          pairs.push([dataGot[i][0], dataGot[i][1], valueB]);
-        } else {
-          pairs.push([dataGot[i][0], dataGot[i][1], valueA]);
+  }).on('mouseleave', '#waypoints a .settings', function () {
+    var _this = this;
+    setTimeout(function () {
+        if (!$(".popover:hover").length) {
+            $(_this).popover('destroy');
         }
-      }
-    }
-  }
-  return pairs;
-}
-
-function handleTSP(locations) {
-  var dataGot = [];
-  for(var i = 0; i < locations.length; i++) {
-    for(var j = 0; j < locations.length; j++) {
-      if (i != j) {
-        link = "http://free.rome2rio.com/api/1.2/json/Search?key=XRpzZBCX&oName=" + locations[i][0] + "&oPos=" + locations[i][1] + "," + locations[i][2] + "&oKind=city&dName=" + locations[j][0] + "&dPos=" + locations[j][1] + "," + locations[j][2] + "&dKind=city&currencyCode=EUR";
-        oId = locations[i][0] + '_' +  locations[i][1] + '_' + locations[i][2];
-        dId = locations[j][0] + '_' +  locations[j][1] + '_' + locations[j][2];
-        $.getJSON(link, function(data) {
-          dataGot.push([oId, dId, data]);
-        });
-      }
-    }
-  }
-}
+    }, 100);
+  });
