@@ -86,28 +86,35 @@ function addDummyNode(matrix, start, end) {
 function handleTSP(locations) {
   var dataGot = [];
   var link, oId, dId;
-  console.log(locations);
+  var nb_data = 0;
   for(var i = 0; i < locations.length; i++) {
-    var elem = [];
+    (function(i) {
+      var elem = [];
     for(var j = 0; j < locations.length; j++) {
+      (function(j) {
         if (i != j) {
           link = "http://free.rome2rio.com/api/1.2/json/Search?key=XRpzZBCX&oName=" + locations[i][0] + "&oPos=" + locations[i][1] + "," + locations[i][2] + "&oKind=city&dName=" + locations[j][0] + "&dPos=" + locations[j][1] + "," + locations[j][2] + "&dKind=city&currencyCode=EUR";
           console.log(link);
           oId = locations[i][0] + '_' +  locations[i][1] + '_' + locations[i][2];
           dId = locations[j][0] + '_' +  locations[j][1] + '_' + locations[j][2];
-          $.ajax({
-            url:link, 
-            dataType:'json',
-            async:false,
-            success:function(data) {
-                elem.push([oId, dId, data]);
-            }
-          });
+          (function(oId, dId) {
+              $.when($.getJSON(link)).then(function(data) {
+                  elem.push([oId, dId, data]);
+                  nb_data++;
+              });
+          })(oId, dId);
         }
+     })(j);
     }
     dataGot.push(elem);
+    })(i);
   }
   
-  console.log(dataGot);
-  console.log(JSON.stringify(dataGot));
+  var getData = setTimeout(function(){
+    if (nb_data == (locations.length * (locations.length - 1))) {
+        clearTimeout(getData);
+        console.log(dataGot);
+        console.log(JSON.stringify(dataGot));
+    }
+  }, 100);
 }
