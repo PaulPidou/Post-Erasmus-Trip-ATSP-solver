@@ -1,6 +1,9 @@
-var resultPaths = [];
+API_handler = function() {
+    this.data;
+    this.resultPaths = [];
+}
 
-function orderByFatest(routes) {
+API_handler.prototype.orderByFatest = function(routes) {
   var routesSorted = routes;
   routesSorted.sort(function(a, b) {
     if (a.duration > b.duration)
@@ -12,7 +15,7 @@ function orderByFatest(routes) {
   return routesSorted;
 }
 
-function orderByShortest(routes) {
+API_handler.prototype.orderByShortest = function(routes) {
   var routesSorted = routes;
   routesSorted.sort(function(a, b) {
     if (a.distance > b.distance)
@@ -24,7 +27,7 @@ function orderByShortest(routes) {
   return routesSorted;
 }
 
-function orderByCheapest(routes) {
+API_handler.prototype.orderByCheapest = function(routes) {
   var routesSorted = routes;
   routesSorted.sort(function(a, b) {
     if (a.indicativePrice.price > b.indicativePrice.price)
@@ -36,7 +39,7 @@ function orderByCheapest(routes) {
   return routesSorted;
 }
 
-function getMatrix(dataGot, orderMode) {
+API_handler.prototype.getMatrix = function(dataGot, orderMode) {
   var routesPicked;
   var value;
   var matrix = [];
@@ -45,13 +48,13 @@ function getMatrix(dataGot, orderMode) {
     for (var j = 0; j < dataGot.length; j++) {
       if (i != j ) {
         if (oderMode == "fatest") {
-          routesPicked = orderByFatest(dataGot[i][2].routes);
+          routesPicked = this.orderByFatest(dataGot[i][j][2].routes);
           value = routesPicked[0].duration;
         } else if (orderMode == "shortest") {
-          routesPicked = orderByShortest(dataGot[i][2].routes);
+          routesPicked = this.orderByShortest(dataGot[i][j][2].routes);
           value = routesPicked[0].distance;
         } else if (orderMode == "cheapest") {
-          routesPicked = orderByCheapest(dataGot[i][2].routes);
+          routesPicked = this.orderByCheapest(dataGot[i][j][2].routes);
           value = routesPicked[0].indicativePrice.price;
         } else {return null;}
         elem.push([dataGot[i][j][0], dataGot[i][j][1], value]);
@@ -64,7 +67,7 @@ function getMatrix(dataGot, orderMode) {
   return matrix;
 }
 
-function addDummyNode(matrix, start, end) {
+API_handler.prototype.addDummyNode = function(matrix, start, end) {
     var length = matrix.length;
     var elem = [];
     for (var i = 0; i < length; i++) { 
@@ -83,8 +86,8 @@ function addDummyNode(matrix, start, end) {
     matrix.push(elem);
 }
 
-function handleTSP(locations) {
-  var dataGot = [];
+API_handler.prototype.handle = function(locations) {
+  dataGot = [];
   var link, oId, dId;
   var nb_data = 0;
   for(var i = 0; i < locations.length; i++) {
@@ -94,7 +97,6 @@ function handleTSP(locations) {
       (function(j) {
         if (i != j) {
           link = "http://free.rome2rio.com/api/1.2/json/Search?key=XRpzZBCX&oName=" + locations[i][0] + "&oPos=" + locations[i][1] + "," + locations[i][2] + "&oKind=city&dName=" + locations[j][0] + "&dPos=" + locations[j][1] + "," + locations[j][2] + "&dKind=city&currencyCode=EUR";
-          console.log(link);
           oId = locations[i][0] + '_' +  locations[i][1] + '_' + locations[i][2];
           dId = locations[j][0] + '_' +  locations[j][1] + '_' + locations[j][2];
           (function(oId, dId) {
@@ -110,11 +112,11 @@ function handleTSP(locations) {
     })(i);
   }
   
-  var getData = setTimeout(function(){
+  var getData = setInterval (function(){
     if (nb_data == (locations.length * (locations.length - 1))) {
-        clearTimeout(getData);
-        console.log(dataGot);
-        console.log(JSON.stringify(dataGot));
+        clearInterval(getData);
+        this.data = dataGot.slice();
+        console.log(this.data);
     }
   }, 100);
 }

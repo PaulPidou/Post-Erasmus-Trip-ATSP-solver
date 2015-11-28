@@ -186,7 +186,8 @@ function initMap() {
   });
   
   $("#rome2rio").click(function(){
-    handleTSP(locations);
+    var handler = new API_handler();
+    handler.handle(locations);
   });
 }
 

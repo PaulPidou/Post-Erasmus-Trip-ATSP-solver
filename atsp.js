@@ -78,7 +78,6 @@ var cities = [[["A", "A", 0], ["A", "B", 6], ["A", "C", 5], ["A", "D", 2]],
               [["B", "A", 5], ["B", "B", 0], ["B", "C", 4], ["B", "D", 1]],
               [["C", "A", 2], ["C", "B", 3], ["C", "C", 0], ["C", "D", 3]],
               [["D", "A", 4], ["D", "B", 8], ["D", "C", 4], ["D", "D", 0]]];
-addDummyNode(cities, "A", "D");
 var problem = new ATSP();
 problem.anneal(cities);
 for (var i = 0; i < problem.currentOrder.length - 1; i++) {
