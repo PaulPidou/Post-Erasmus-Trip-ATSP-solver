@@ -29,18 +29,6 @@ function initMap() {
     markers = [];
   }
   
-  function enableSubmit() {
-    if (locations.length > 1) {
-      if($('#submit').hasClass('disabled')) {
-        $('#submit').removeClass('disabled');
-      }
-    } else {
-      if(!$('#submit').hasClass('disabled')) {
-        $('#submit').addClass('disabled');
-      }
-    }
-  }
-  
   function setMarkers(placeGet) {
     var place = placeGet;
     if (place == undefined) {
@@ -105,7 +93,7 @@ function initMap() {
   autocomplete.addListener('place_changed', function() {
     if (locations.length < 8) {
       setMarkers(autocomplete.getPlace())
-      enableSubmit();
+      enableSubmit(locations);
     } else {
       $('#search-warning p').html('<span class="glyphicon glyphicon-exclamation-sign"></span> You can only select a maximum of eight locations.')
       $('#search-warning').modal();
@@ -187,7 +175,11 @@ function initMap() {
   
   $("#rome2rio").click(function(){
     var handler = new API_handler();
-    handler.handle(locations);
+    //handler.handle(locations);
+    handler.data = data_test;
+    console.log(handler.data);
+    fatest_m = handler.getMatrix("fatest");
+    console.log(fatest_m);
   });
 }
 
@@ -228,6 +220,18 @@ function calculateAndDisplayRoute(directionsService, directionsDisplay, travel_m
       $('#route-warning').modal();
     }
   });
+}
+
+function enableSubmit(locations) {
+  if (locations.length > 1) {
+    if($('#submit').hasClass('disabled')) {
+      $('#submit').removeClass('disabled');
+    }
+  } else {
+    if(!$('#submit').hasClass('disabled')) {
+      $('#submit').addClass('disabled');
+    }
+  }
 }
 
 function getElementWithAttribute(attribute, id) {

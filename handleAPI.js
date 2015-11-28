@@ -1,6 +1,6 @@
 API_handler = function() {
     this.data;
-    this.resultPaths = [];
+    //this.resultPaths = [];
 }
 
 API_handler.prototype.orderByFatest = function(routes) {
@@ -39,28 +39,30 @@ API_handler.prototype.orderByCheapest = function(routes) {
   return routesSorted;
 }
 
-API_handler.prototype.getMatrix = function(dataGot, orderMode) {
+API_handler.prototype.getMatrix = function(orderMode) {
   var routesPicked;
   var value;
   var matrix = [];
-  for (var i = 0; i < dataGot.length; i++) {
-    var elemn = [];
-    for (var j = 0; j < dataGot.length; j++) {
-      if (i != j ) {
-        if (oderMode == "fatest") {
-          routesPicked = this.orderByFatest(dataGot[i][j][2].routes);
+  for (var i = 0; i < this.data.length; i++) {
+    var elem = [];
+    for (var j = 0; j < this.data[i].length; j++) {
+        if (orderMode == "fatest") {
+          routesPicked = this.orderByFatest(this.data[i][j][2].routes);
           value = routesPicked[0].duration;
         } else if (orderMode == "shortest") {
-          routesPicked = this.orderByShortest(dataGot[i][j][2].routes);
+          routesPicked = this.orderByShortest(this.data[i][j][2].routes);
           value = routesPicked[0].distance;
         } else if (orderMode == "cheapest") {
-          routesPicked = this.orderByCheapest(dataGot[i][j][2].routes);
+          routesPicked = this.orderByCheapest(this.data[i][j][2].routes);
           value = routesPicked[0].indicativePrice.price;
         } else {return null;}
-        elem.push([dataGot[i][j][0], dataGot[i][j][1], value]);
-      } else {
-        elem.push([dataGot[i][j][0], dataGot[i][j][1], 0]);
-      }
+        if (i == j) {
+            elem.push([this.data[i][j][0], this.data[i][j][0], 0]);
+        }
+        elem.push([this.data[i][j][0], this.data[i][j][1], value]);
+    }
+    if (i == this.data.length - 1) {
+        elem.push([this.data[i][0][0], this.data[i][0][0], 0]);
     }
     matrix.push(elem);
   }
@@ -116,7 +118,6 @@ API_handler.prototype.handle = function(locations) {
     if (nb_data == (locations.length * (locations.length - 1))) {
         clearInterval(getData);
         this.data = dataGot.slice();
-        console.log(this.data);
     }
   }, 100);
 }
