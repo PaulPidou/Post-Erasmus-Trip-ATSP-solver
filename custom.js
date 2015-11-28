@@ -177,9 +177,22 @@ function initMap() {
     var handler = new API_handler();
     //handler.handle(locations);
     handler.data = data_test;
-    console.log(handler.data);
-    fatest_m = handler.getMatrix("fatest");
-    console.log(fatest_m);
+    matrices = [];
+    ["cheapest", "fatest", "shortest"].forEach(function(value) {
+      matrices.push(handler.getMatrix(value));
+    });
+    //console.log(matrices);
+        
+    var solver = new ATSP();
+    for (var i = 0; i < matrices.length; i++) {
+      solver.anneal(matrices[i]);
+      console.log(solver.currentOrder);
+      for (var j = 0; j < solver.currentOrder.length - 1; j++) {
+        console.log(matrices[i][solver.currentOrder[j]][solver.currentOrder[j + 1]]);
+      }
+      console.log(matrices[i][solver.currentOrder[solver.currentOrder.length - 1]][solver.currentOrder[0]]);
+      console.log(solver.shortestDistance);
+    }
   });
 }
 
