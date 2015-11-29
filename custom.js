@@ -204,13 +204,13 @@ function initMap() {
       for(var j = 0; j < results[0].length; j++) {
         if (results[0][i][0] == handler.indexes.cheapest[j][0][0]) {
           for(var k = 0; k < handler.indexes.cheapest[j].length; k++) {
-            if (results[0][i][1] == handler.indexes.cheapest[i][k][1]) {
+            if (results[0][i][1] == handler.indexes.cheapest[j][k][1]) {
               console.log(results[0][i][0]);
               console.log(results[0][i][1]);
-              console.log(handler.data[handler.indexes.cheapest[i][k][2]][handler.indexes.cheapest[i][k][3]][2].routes[handler.indexes.cheapest[i][k][4]]);
+              console.log(handler.data[handler.indexes.cheapest[j][k][2]][handler.indexes.cheapest[j][k][3]][2].routes[handler.indexes.cheapest[j][k][4]]);
             }
           }
-        }
+        }/*
         if (results[1][i][0] == handler.indexes.fatest[j][0][0]) {
           for(var k = 0; k < handler.indexes.cheapest[j].length; k++) {
             if (results[1][i][1] == handler.indexes.cheapest[i][k][1]) {
@@ -228,7 +228,7 @@ function initMap() {
               console.log(handler.data[handler.indexes.cheapest[i][k][2]][handler.indexes.cheapest[i][k][3]][2].routes[handler.indexes.cheapest[i][k][4]]);
             }
           }
-        }
+        }*/
       //console.log(results[0][i][0]);
       //console.log(handler.indexes.cheapest[j][0][0]);
       }
