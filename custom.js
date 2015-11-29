@@ -173,16 +173,32 @@ function initMap() {
     }
   });
   
+  function enableSubmit(locations) {
+    if (locations.length > 1) {
+      if($('#submit').hasClass('disabled')) {
+        $('#submit').removeClass('disabled');
+      }
+    } else {
+      if(!$('#submit').hasClass('disabled')) {
+        $('#submit').addClass('disabled');
+      }
+    }
+  }
+  
   $("#rome2rio").click(function(){
     var handler = new API_handler();
     //handler.handle(locations);
     handler.data = data_test;
-    matrices = [];
+    var matrices = [];
     ["cheapest", "fatest", "shortest"].forEach(function(value) {
-      matrices.push(handler.getMatrix(value));
+      if (start_end[0] != start_end[1]) {
+        matrices.push(handler.addDummyNode(handler.getMatrix(value), start_end[0], start_end[1]));
+      } else {
+        matrices.push(handler.getMatrix(value));
+      }
     });
     //console.log(handler.data);
-    console.log(handler.indexes);
+    //console.log(handler.indexes);
         
     var solver = new ATSP();
     for (var i = 0; i < matrices.length; i++) {
@@ -234,18 +250,6 @@ function calculateAndDisplayRoute(directionsService, directionsDisplay, travel_m
       $('#route-warning').modal();
     }
   });
-}
-
-function enableSubmit(locations) {
-  if (locations.length > 1) {
-    if($('#submit').hasClass('disabled')) {
-      $('#submit').removeClass('disabled');
-    }
-  } else {
-    if(!$('#submit').hasClass('disabled')) {
-      $('#submit').addClass('disabled');
-    }
-  }
 }
 
 function getElementWithAttribute(attribute, id) {

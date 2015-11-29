@@ -90,6 +90,7 @@ API_handler.prototype.addDummyNode = function(matrix, start, end) {
             matrix[i].push([matrix[i][0][0], "#", 0]);
             elem.push(["#", matrix[i][0][0], 0]);
         } else if (matrix[i][0][0] == end) {
+            for (var j = 0; j < length; j++) {if(i != j) matrix[i][j][2] = Infinity;}
             matrix[i].push([matrix[i][0][0], "#", 0]);
             elem.push(["#", matrix[i][0][0], 0]);
         } else {
@@ -99,6 +100,7 @@ API_handler.prototype.addDummyNode = function(matrix, start, end) {
     }
     elem.push(["#", "#", 0]);
     matrix.push(elem);
+    return matrix;
 }
 
 API_handler.prototype.handle = function(locations) {
