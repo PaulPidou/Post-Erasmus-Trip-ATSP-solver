@@ -67,7 +67,7 @@ API_handler.prototype.getMatrix = function(orderMode) {
           routesPicked = this.orderByCheapest(this.data[i][j][2].routes);
           value = routesPicked[0].indicativePrice.price;
         } else {return null;}
-        index.push([this.data[i][j][0], this.data[i][j][1], this.data[i][j][2].routes.indexOfName(routesPicked[0].name)]);
+        index.push([this.data[i][j][0], this.data[i][j][1], i, j, this.data[i][j][2].routes.indexOfName(routesPicked[0].name)]);
         if (i == j) {
             elem.push([this.data[i][j][0], this.data[i][j][0], 0]);
         }

@@ -75,7 +75,19 @@
       <button id="rome2rio" type="submit" class="btn btn-default">Rome2rio</button>
       <button id="submit" type="submit" class="btn btn-default disabled">Go</button>
       </div>
-      <div id="directions-panel"></div>
+      <div id="directions-panel">
+        <ul class="nav nav-tabs nav-justified">
+          <li role="presentation" class="active"><a href="#cheapest"><span class="glyphicon glyphicon-euro"></span></a></li>
+          <li role="presentation"><a href="#fatest"><span class="glyphicon glyphicon-time"></span></a></li>
+          <li role="presentation"><a href="#shortest"><span class="glyphicon glyphicon-resize-small"></span></a></li>
+        </ul>
+        
+        <div class="tab-content">
+          <div role="tabpanel" class="tab-pane active" id="cheapest">...</div>
+          <div role="tabpanel" class="tab-pane" id="fatest">...</div>
+          <div role="tabpanel" class="tab-pane" id="shortest">...</div>
+        </div>
+      </div>
       </div>
       <div id="map"></div>
 

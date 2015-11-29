@@ -156,7 +156,7 @@ function initMap() {
       }
     }
     setMarkers(undefined);
-    enableSubmit();
+    enableSubmit(locations);
   });
   
   $(document).on('click', '.popover .list-group a', function(ev) {
@@ -173,19 +173,8 @@ function initMap() {
     }
   });
   
-  function enableSubmit(locations) {
-    if (locations.length > 1) {
-      if($('#submit').hasClass('disabled')) {
-        $('#submit').removeClass('disabled');
-      }
-    } else {
-      if(!$('#submit').hasClass('disabled')) {
-        $('#submit').addClass('disabled');
-      }
-    }
-  }
-  
   $("#rome2rio").click(function(){
+    $("#directions-panel").css('display', 'block');
     var handler = new API_handler();
     //handler.handle(locations);
     handler.data = data_test;
@@ -197,18 +186,52 @@ function initMap() {
         matrices.push(handler.getMatrix(value));
       }
     });
-    //console.log(handler.data);
-    //console.log(handler.indexes);
         
     var solver = new ATSP();
+    var results = [];
     for (var i = 0; i < matrices.length; i++) {
       solver.anneal(matrices[i]);
-      console.log(solver.currentOrder);
+      var result = [];
       for (var j = 0; j < solver.currentOrder.length - 1; j++) {
-        console.log(matrices[i][solver.currentOrder[j]][solver.currentOrder[j + 1]]);
+        result.push(matrices[i][solver.currentOrder[j]][solver.currentOrder[j + 1]]);
       }
-      console.log(matrices[i][solver.currentOrder[solver.currentOrder.length - 1]][solver.currentOrder[0]]);
-      console.log(solver.shortestDistance);
+      result.push(matrices[i][solver.currentOrder[solver.currentOrder.length - 1]][solver.currentOrder[0]]);
+      results.push(result);
+    }
+    console.log(results);
+    console.log(handler.indexes);
+    for (var i = 0; i < results[0].length; i++) {
+      for(var j = 0; j < results[0].length; j++) {
+        if (results[0][i][0] == handler.indexes.cheapest[j][0][0]) {
+          for(var k = 0; k < handler.indexes.cheapest[j].length; k++) {
+            if (results[0][i][1] == handler.indexes.cheapest[i][k][1]) {
+              console.log(results[0][i][0]);
+              console.log(results[0][i][1]);
+              console.log(handler.data[handler.indexes.cheapest[i][k][2]][handler.indexes.cheapest[i][k][3]][2].routes[handler.indexes.cheapest[i][k][4]]);
+            }
+          }
+        }
+        if (results[1][i][0] == handler.indexes.fatest[j][0][0]) {
+          for(var k = 0; k < handler.indexes.cheapest[j].length; k++) {
+            if (results[1][i][1] == handler.indexes.cheapest[i][k][1]) {
+              console.log(results[1][i][0]);
+              console.log(results[1][i][1]);
+              console.log(handler.data[handler.indexes.cheapest[i][k][2]][handler.indexes.cheapest[i][k][3]][2].routes[handler.indexes.cheapest[i][k][4]]);
+            }
+          }
+        }
+        if (results[2][i][0] == handler.indexes.shortest[j][0][0]) {
+          for(var k = 0; k < handler.indexes.cheapest[j].length; k++) {
+            if (results[2][i][1] == handler.indexes.cheapest[i][k][1]) {
+              console.log(results[2][i][0]);
+              console.log(results[2][i][1]);
+              console.log(handler.data[handler.indexes.cheapest[i][k][2]][handler.indexes.cheapest[i][k][3]][2].routes[handler.indexes.cheapest[i][k][4]]);
+            }
+          }
+        }
+      //console.log(results[0][i][0]);
+      //console.log(handler.indexes.cheapest[j][0][0]);
+      }
     }
   });
 }
@@ -252,6 +275,18 @@ function calculateAndDisplayRoute(directionsService, directionsDisplay, travel_m
   });
 }
 
+function enableSubmit(locations) {
+  if (locations.length > 1) {
+    if($('#submit').hasClass('disabled')) {
+      $('#submit').removeClass('disabled');
+    }
+  } else {
+    if(!$('#submit').hasClass('disabled')) {
+      $('#submit').addClass('disabled');
+    }
+  }
+}
+
 function getElementWithAttribute(attribute, id) {
   var allElements = document.getElementsByTagName('*');
   for (var i = 0, n = allElements.length; i < n; i++) {
@@ -286,4 +321,9 @@ $('body').popover({selector: '[data-popover]', trigger: 'manual', animation: fal
             $(_this).popover('destroy');
         }
     }, 100);
-  });
+});
+  
+$('#directions-panel .nav a').click(function (e) {
+  e.preventDefault();
+  $(this).tab('show');
+})
