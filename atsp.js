@@ -1,3 +1,8 @@
+Array.prototype.rotate = function(n) {
+  this.unshift.apply( this, this.splice(n, this.length));
+  return this;
+}
+
 ATSP = function() {
     this.currentOrder;
     this.nextOrder = [];
@@ -46,13 +51,15 @@ ATSP.prototype.getNextArrangement = function(order) {
     return newOrder;
 }
 
-ATSP.prototype.anneal = function(cities) {
+ATSP.prototype.anneal = function(cities, start_id) {
     var iteration = -1;
     
     var temperature = 10000.0;
     var deltaDistance = 0.0;
     var coolingRate = 0.9999;
     var absoluteTemperature = 0.0001;
+    
+    var n = -1;
 
     this.loadCities(cities);
     
@@ -72,5 +79,14 @@ ATSP.prototype.anneal = function(cities) {
         temperature *= coolingRate;
         iteration++;
     }
+    
     this.shortestDistance = this.getTotalDistance(this.currentOrder);
+    for(var j = 0; j < this.currentOrder.length - 1; j++) {
+        if (cities[this.currentOrder[j]][this.currentOrder[j + 1]][0] == start_id) {
+            n = j;
+            break;
+        }
+    }
+    if (n == -1) { n = this.currentOrder.length - 1; }
+    this.currentOrder.rotate(n);
 }

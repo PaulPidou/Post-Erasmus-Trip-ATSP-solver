@@ -190,7 +190,7 @@ function initMap() {
     var solver = new ATSP();
     var results = [];
     for (var i = 0; i < matrices.length; i++) {
-      solver.anneal(matrices[i]);
+      solver.anneal(matrices[i], start_end[0]);
       var result = [];
       for (var j = 0; j < solver.currentOrder.length - 1; j++) {
         result.push(matrices[i][solver.currentOrder[j]][solver.currentOrder[j + 1]]);
