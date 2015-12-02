@@ -213,16 +213,23 @@ function initMap() {
 }
 
 function displayResults(results, handler) {
+  var from, to;
+  
   $.each(results, function(key, list) {
+    $('#' + key + ' .spinner').css('display', 'none');
     console.log(key);
       for (var i = 0; i < list.length; i++) {
         for(var j = 0; j < list.length; j++) {
           if (list[i][0] == handler.indexes[key][j][0][0]) {
             for(var k = 0; k < handler.indexes[key][j].length; k++) {
               if (list[i][1] == handler.indexes[key][j][k][1]) {
+                from = list[i][0].split('_');
+                to = list[i][1].split('_');
+                $('#' + key + ' .list-group').append('<button type="button" class="list-group-item">From ' + from[0] + ' to ' + to[0] + '</button>');
                 console.log(list[i][0]);
                 console.log(list[i][1]);
                 console.log(handler.data[handler.indexes[key][j][k][2]][handler.indexes[key][j][k][3]][2].routes[handler.indexes[key][j][k][4]]);
+                
               }
             }
           }
