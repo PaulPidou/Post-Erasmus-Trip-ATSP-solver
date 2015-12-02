@@ -178,61 +178,56 @@ function initMap() {
     var handler = new API_handler();
     //handler.handle(locations);
     handler.data = data_test;
-    var matrices = [];
+    var matrices = {
+      cheapest: [],
+      fatest: [],
+      shortest: []
+    };
+    
     ["cheapest", "fatest", "shortest"].forEach(function(value) {
       if (start_end[0] != start_end[1]) {
-        matrices.push(handler.addDummyNode(handler.getMatrix(value), start_end[0], start_end[1]));
+        matrices[value] = handler.addDummyNode(handler.getMatrix(value), start_end[0], start_end[1]);
       } else {
-        matrices.push(handler.getMatrix(value));
+        matrices[value] = handler.getMatrix(value);
       }
     });
         
     var solver = new ATSP();
-    var results = [];
-    for (var i = 0; i < matrices.length; i++) {
-      solver.anneal(matrices[i], start_end[0]);
+    var results = {
+      cheapest: [],
+      fatest: [],
+      shortest: []
+    };
+    
+    $.each(matrices, function(key, matrix) {
+      solver.anneal(matrix, start_end[0]);
       var result = [];
       for (var j = 0; j < solver.currentOrder.length - 1; j++) {
-        result.push(matrices[i][solver.currentOrder[j]][solver.currentOrder[j + 1]]);
+        result.push(matrix[solver.currentOrder[j]][solver.currentOrder[j + 1]]);
       }
-      result.push(matrices[i][solver.currentOrder[solver.currentOrder.length - 1]][solver.currentOrder[0]]);
-      results.push(result);
-    }
-    console.log(results);
-    console.log(handler.indexes);
-    for (var i = 0; i < results[0].length; i++) {
-      for(var j = 0; j < results[0].length; j++) {
-        if (results[0][i][0] == handler.indexes.cheapest[j][0][0]) {
-          for(var k = 0; k < handler.indexes.cheapest[j].length; k++) {
-            if (results[0][i][1] == handler.indexes.cheapest[j][k][1]) {
-              console.log(results[0][i][0]);
-              console.log(results[0][i][1]);
-              console.log(handler.data[handler.indexes.cheapest[j][k][2]][handler.indexes.cheapest[j][k][3]][2].routes[handler.indexes.cheapest[j][k][4]]);
-            }
-          }
-        }/*
-        if (results[1][i][0] == handler.indexes.fatest[j][0][0]) {
-          for(var k = 0; k < handler.indexes.cheapest[j].length; k++) {
-            if (results[1][i][1] == handler.indexes.cheapest[i][k][1]) {
-              console.log(results[1][i][0]);
-              console.log(results[1][i][1]);
-              console.log(handler.data[handler.indexes.cheapest[i][k][2]][handler.indexes.cheapest[i][k][3]][2].routes[handler.indexes.cheapest[i][k][4]]);
+      result.push(matrix[solver.currentOrder[solver.currentOrder.length - 1]][solver.currentOrder[0]]);
+      results[key] = result;
+    });
+    displayResults(results, handler);
+  });
+}
+
+function displayResults(results, handler) {
+  $.each(results, function(key, list) {
+    console.log(key);
+      for (var i = 0; i < list.length; i++) {
+        for(var j = 0; j < list.length; j++) {
+          if (list[i][0] == handler.indexes[key][j][0][0]) {
+            for(var k = 0; k < handler.indexes[key][j].length; k++) {
+              if (list[i][1] == handler.indexes[key][j][k][1]) {
+                console.log(list[i][0]);
+                console.log(list[i][1]);
+                console.log(handler.data[handler.indexes[key][j][k][2]][handler.indexes[key][j][k][3]][2].routes[handler.indexes[key][j][k][4]]);
+              }
             }
           }
         }
-        if (results[2][i][0] == handler.indexes.shortest[j][0][0]) {
-          for(var k = 0; k < handler.indexes.cheapest[j].length; k++) {
-            if (results[2][i][1] == handler.indexes.cheapest[i][k][1]) {
-              console.log(results[2][i][0]);
-              console.log(results[2][i][1]);
-              console.log(handler.data[handler.indexes.cheapest[i][k][2]][handler.indexes.cheapest[i][k][3]][2].routes[handler.indexes.cheapest[i][k][4]]);
-            }
-          }
-        }*/
-      //console.log(results[0][i][0]);
-      //console.log(handler.indexes.cheapest[j][0][0]);
       }
-    }
   });
 }
 
