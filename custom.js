@@ -173,6 +173,15 @@ function initMap() {
     }
   });
   
+  $(document).on('click', '#directions-panel .tab-content .routes .list-group-item', function(ev) {
+    var target = $(ev.target);
+    if (target[0].nextSibling.className == 'collapse') {
+      target[0].nextSibling.className += ' in';
+    } else {
+      target[0].nextSibling.className = 'collapse';
+    }
+  });
+  
   $("#rome2rio").click(function(){
     $("#directions-panel").css('display', 'block');
     var handler = new API_handler();
@@ -212,11 +221,37 @@ function initMap() {
   });
 }
 
+function getGlyph(kind) {
+  if (kind =='train') {
+    return 'fa fa-train';
+  } else if (kind == 'bus') {
+    return 'fa fa-bus';
+  } else if (kind == 'flight') {
+    return 'fa fa-plane';
+  } else if (kind == 'car') {
+    return 'fa fa-car';
+  } else if (kind == 'ferry') {
+    return 'fa fa-ship';
+  } else {
+    return 'fa fa-male';
+  }
+}
+
+function getDurationString(duration) {
+  var minutes;
+  if ((duration % 60) < 10) {minutes = '0' + (duration % 60).toString();} else {minutes = (duration % 60).toString();}
+  return Math.floor(duration / 60).toString() + 'h' + minutes;
+}
+
 function displayResults(results, handler) {
   var from, to;
+  var duration, price, distance;
+  var routes;
+  var html;
   
   $.each(results, function(key, list) {
     $('#' + key + ' .spinner').css('display', 'none');
+    duration = 0, price = 0, distance = 0;
     console.log(key);
       for (var i = 0; i < list.length; i++) {
         for(var j = 0; j < list.length; j++) {
@@ -225,16 +260,31 @@ function displayResults(results, handler) {
               if (list[i][1] == handler.indexes[key][j][k][1]) {
                 from = list[i][0].split('_');
                 to = list[i][1].split('_');
-                $('#' + key + ' .list-group').append('<button type="button" class="list-group-item">From ' + from[0] + ' to ' + to[0] + '</button>');
+                
+                route = handler.data[handler.indexes[key][j][k][2]][handler.indexes[key][j][k][3]][2].routes[handler.indexes[key][j][k][4]];
+                distance += route.distance;
+                duration += route.duration;
+                price += route.indicativePrice.price;
+                html = '';
+                for (var h = 0; h < route.segments.length; h++) {html += '<span class="badge"><span class="' + getGlyph(route.segments[h].kind) +  '"></span></span>';}
+                $('#' + key + ' .list-group').append('<div class="list-group-item">' + from[0] + ' - ' + to[0] + html + '<br>' +
+                                                     getDurationString(route.duration) + '<span class="pull-right">' + route.indicativePrice.price.toString() + ' &euro;</span>' + '</div>');
+                html = route.name;
+                $('#' + key + ' .list-group').append('<div class="collapse" id="' + key + list[i][0] + '_' + list[i][1] + '">' + html + '</div>');
+                
                 console.log(list[i][0]);
                 console.log(list[i][1]);
                 console.log(handler.data[handler.indexes[key][j][k][2]][handler.indexes[key][j][k][3]][2].routes[handler.indexes[key][j][k][4]]);
-                
               }
             }
           }
         }
       }
+      html = '<ul class="list-group"><li class="list-group-item"><span class="glyphicon glyphicon-euro"></span> Price: ' + price.toString() + ' &euro;</li>' +
+             '<li class="list-group-item"><span class="glyphicon glyphicon-resize-small"></span> Distance: ' + Math.round(distance).toString() + ' Kms </li>' +
+             '<li class="list-group-item"><span class="glyphicon glyphicon-time"></span> Duration: ' + getDurationString(duration) + '</li></ul>';
+
+      $('#' + key + ' .heading').append(html);
   });
 }
 
