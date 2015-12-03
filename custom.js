@@ -266,7 +266,10 @@ function displayResults(results, handler) {
                 duration += route.duration;
                 price += route.indicativePrice.price;
                 html = '';
-                for (var h = 0; h < route.segments.length; h++) {html += '<span class="badge"><span class="' + getGlyph(route.segments[h].kind) +  '"></span></span>';}
+                for (var h = 0; h < route.segments.length; h++) {
+                  if (route.segments[h].isMajor == 1)
+                    html += '<span class="badge"><span class="' + getGlyph(route.segments[h].kind) +  '"></span></span>';
+                }
                 $('#' + key + ' .list-group').append('<div class="list-group-item">' + from[0] + ' - ' + to[0] + html + '<br>' +
                                                      getDurationString(route.duration) + '<span class="pull-right">' + route.indicativePrice.price.toString() + ' &euro;</span>' + '</div>');
                 html = route.name;
