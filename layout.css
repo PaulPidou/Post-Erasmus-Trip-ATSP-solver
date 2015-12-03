@@ -27,11 +27,12 @@ html, body {height: 100%;margin: 0;padding: 0;}
 #directions-panel {
   margin-top: 20px;
   width: 100%;
-  overflow: auto;
   display: none;
 }
+#directions-panel .tab-content {overflow: auto;}
 #directions-panel .tab-content .routes .list-group-item {padding: 10px 15px;border: 1px solid #ddd;cursor: pointer;}
 #directions-panel .tab-content .routes .list-group-item:hover {background-color: #e6e6e6;}
+#directions-panel .heading .list-group {margin-top: 5px; margin-bottom: 10px;}
 #directions-panel .heading .list-group-item {border: none;padding: 5px 15px;}
 #directions-panel .routes div {border-left: 1px solid #ddd; border-right:1px solid #ddd;}
 .list-group-item:focus {background-image: none;outline: 0;-webkit-box-shadow: none; box-shadow: none;}

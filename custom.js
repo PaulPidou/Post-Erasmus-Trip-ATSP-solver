@@ -320,7 +320,7 @@ function calculateAndDisplayRoute(directionsService, directionsDisplay, travel_m
         summaryPanel.innerHTML += route.legs[i].end_address + '<br>';
         summaryPanel.innerHTML += route.legs[i].distance.text + '<br><hr>';
       }
-      summaryPanel.style.height = window.innerHeight - document.getElementById("search-panel").offsetHeight - 95 + "px";
+      summaryPanel.style.height = window.innerHeight - document.getElementById("search-panel").offsetHeight + "px";
     } else {
       $('#route-warning').modal();
     }
