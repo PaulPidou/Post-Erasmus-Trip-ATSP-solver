@@ -109,8 +109,6 @@ function initMap() {
     });
   }
   setupClickListener('changemode-driving', google.maps.TravelMode.DRIVING);
-  setupClickListener('changemode-bicycling', google.maps.TravelMode.BICYCLING);
-  setupClickListener('changemode-walking', google.maps.TravelMode.WALKING);
   
   directionsDisplay.setMap(map);
   
