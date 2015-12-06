@@ -108,6 +108,7 @@ function initMap() {
     } else {
       $("#directions-panel").css('display', 'none');
       $('#gmap_response').css('display', 'block');
+      console.log($('input[name="travel-mode"]:checked').val());
       calculateAndDisplayRoute(directionsService, directionsDisplay, toll, highway);
     }
   });

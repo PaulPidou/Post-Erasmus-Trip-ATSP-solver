@@ -26,7 +26,7 @@
           <div id="mode-selector" class="btn-group btn-group-justified controls" role="group" data-toggle="buttons">
             <div class="btn-group" role="group">
               <label class="btn btn-default active" style="width: 75%;border-top-left-radius:0px" id="changemode-driving">
-                <input type="radio" name="type" checked="checked"><span class="fa fa-car"></span>
+                <input type="radio" name="travel-mode" value="car" checked="checked"><span class="fa fa-car"></span>
               </label>
               <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="width: 25.7%;padding-left:8%;padding-right:8%;">
                 <span class="caret"></span>
@@ -38,8 +38,8 @@
               </ul>
             </div>
           <div class="btn-group" role="group">
-          <label class="btn btn-default" style="border-top-right-radius:0px">
-            <input type="radio" name="type"><span class="fa fa-plane"> <span class='fa fa-train'></span> <span class='fa fa-bus'></span> <span class='fa fa-ship'></span>
+          <label class="btn btn-default" style="border-top-right-radius:0px" id="changemode-transit">
+            <input type="radio" name="travel-mode" value="transit"><span class="fa fa-plane"> <span class='fa fa-train'></span> <span class='fa fa-bus'></span> <span class='fa fa-ship'></span>
           </label>
           </div>
           </div>
