@@ -106,6 +106,7 @@ function initMap() {
       $('#search-warning p').html('<span class="glyphicon glyphicon-exclamation-sign"></span> You have to add at least three locations.')
       $('#search-warning').modal();
     } else {
+      $('#gmap_response').css('display', 'block');
       calculateAndDisplayRoute(directionsService, directionsDisplay, toll, highway);
     }
   });
@@ -224,8 +225,12 @@ function getGlyph(kind) {
   }
 }
 
-function getDurationString(duration) {
+function getDurationString(duration, seconds) {
+  seconds = typeof seconds !== 'undefined' ? seconds : false;
   var minutes;
+  if (seconds) {
+    duration = Math.floor(duration / 60);
+  } 
   if ((duration % 60) < 10) {minutes = '0' + (duration % 60).toString();} else {minutes = (duration % 60).toString();}
   return Math.floor(duration / 60).toString() + 'h' + minutes;
 }
@@ -271,7 +276,7 @@ function displayResults(results, handler) {
         }
       }
       html = '<ul class="list-group"><li class="list-group-item"><span class="glyphicon glyphicon-euro"></span> Price: ' + price.toString() + ' &euro;</li>' +
-             '<li class="list-group-item"><span class="glyphicon glyphicon-resize-small"></span> Distance: ' + Math.round(distance).toString() + ' Kms </li>' +
+             '<li class="list-group-item"><span class="glyphicon glyphicon-resize-small"></span> Distance: ' + Math.round(distance).toString() + ' kms </li>' +
              '<li class="list-group-item"><span class="glyphicon glyphicon-time"></span> Duration: ' + getDurationString(duration) + '</li></ul>';
 
       $('#' + key + ' .heading').append(html);
@@ -300,18 +305,28 @@ function calculateAndDisplayRoute(directionsService, directionsDisplay, toll, hi
       console.log(response);
       directionsDisplay.setDirections(response);
       var route = response.routes[0];
-      var summaryPanel = document.getElementById('directions-panel');
-      summaryPanel.innerHTML = '';
+      var html = "";
+      var distance = 0;
+      var duration = 0;
       // For each route, display summary information.
+      $('#gmap_response .spinner').css('display', 'none');
+      $('#gmap_response .heading').html("");
+      $('#gmap_response .routes').html("");
       for (var i = 0; i < route.legs.length; i++) {
-        var routeSegment = i + 1;
-        summaryPanel.innerHTML += '<b>Route Segment: ' + routeSegment +
-            '</b><br>';
-        summaryPanel.innerHTML += route.legs[i].start_address + ' to ';
-        summaryPanel.innerHTML += route.legs[i].end_address + '<br>';
-        summaryPanel.innerHTML += route.legs[i].distance.text + '<br><hr>';
+        if (route.legs[i].start_address != route.legs[i].end_address) {
+          distance += route.legs[i].distance.value;
+          duration += route.legs[i].duration.value;
+          var time_span = route.legs[i].duration.text.split(' ');
+          if (parseInt(time_span[2]) < 10) {
+            time_span[2] = "0" + time_span[2];
+          }
+          html = '<div class="list-group-item">' + route.legs[i].start_address.split(',')[0] + ' - ' + route.legs[i].end_address.split(',')[0] + '<br>' + time_span[0] + 'h' + time_span[2] + '<span class="pull-right">' + Math.round(route.legs[i].distance.value/1000).toString() + ' kms </span>' + '</div>';
+           $('#gmap_response .routes').append(html);
+        }
       }
-      summaryPanel.style.height = window.innerHeight - document.getElementById("search-panel").offsetHeight + "px";
+      html = '<ul class="list-group"><li class="list-group-item"><span class="glyphicon glyphicon-resize-small"></span> Distance: ' + Math.round(distance/1000).toString() + ' kms </li>' +
+             '<li class="list-group-item"><span class="glyphicon glyphicon-time"></span> Duration: ' + getDurationString(duration, true) + '</li></ul>';
+      $('#gmap_response .heading').append(html);
     } else {
       $('#route-warning').modal();
     }

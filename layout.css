@@ -24,17 +24,18 @@ html, body {height: 100%;margin: 0;padding: 0;}
 #waypoints .start .start-glyph, #waypoints .end .end-glyph {display: inline;}
 .popover .list-group {margin-bottom: 5px;}
 .popover-content {padding: 0px;}
-#directions-panel {
+#directions-panel, #gmap_response {
   margin-top: 20px;
   width: 100%;
   display: none;
 }
 #directions-panel .tab-content {overflow: auto;}
 #directions-panel .tab-content .routes .list-group-item {padding: 10px 15px;border: 1px solid #ddd;cursor: pointer;}
+#gmap_response .routes .list-group-item {padding: 10px 15px;border: 1px solid #ddd;}
 #directions-panel .tab-content .routes .list-group-item:hover {background-color: #e6e6e6;}
-#directions-panel .heading .list-group {margin-top: 5px; margin-bottom: 10px;}
-#directions-panel .heading .list-group-item {border: none;padding: 5px 15px;}
-#directions-panel .routes div {border-left: 1px solid #ddd; border-right:1px solid #ddd;}
+#directions-panel .heading .list-group, #gmap_response .heading .list-group {margin-top: 5px; margin-bottom: 10px;}
+#directions-panel .heading .list-group-item, #gmap_response .heading .list-group-item {border: none;padding: 5px 15px;}
+#directions-panel .routes div, #gmap_response .routes div {border-left: 1px solid #ddd; border-right:1px solid #ddd;}
 .list-group-item:focus {background-image: none;outline: 0;-webkit-box-shadow: none; box-shadow: none;}
 .spinner {margin: 100px auto 0;width: 70px;text-align: center;}
 .spinner > div {width: 18px;height: 18px;background-color: #337ab7;border-radius: 100%;display: inline-block; -webkit-animation: sk-bouncedelay 1.4s infinite ease-in-out both;animation: sk-bouncedelay 1.4s infinite ease-in-out both;}
