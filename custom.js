@@ -106,6 +106,7 @@ function initMap() {
       $('#search-warning p').html('<span class="glyphicon glyphicon-exclamation-sign"></span> You have to add at least three locations.')
       $('#search-warning').modal();
     } else {
+      $("#directions-panel").css('display', 'none');
       $('#gmap_response').css('display', 'block');
       calculateAndDisplayRoute(directionsService, directionsDisplay, toll, highway);
     }
@@ -130,7 +131,8 @@ function initMap() {
         break;
       }
     }
-    document.getElementById('directions-panel').innerHTML = '';
+    $("#directions-panel").css('display', 'none');
+    $('#gmap_response').css('display', 'none');
     directionsDisplay.setDirections({routes: []});
     if (locations.length > 0) {
       classes = $(this).parent().attr('class').split(" ");
@@ -171,7 +173,9 @@ function initMap() {
   });
   
   $("#rome2rio").click(function(){
+    $("#gmap_response").css('display', 'none');
     $("#directions-panel").css('display', 'block');
+    $("#directions-panel .heading, #directions-panel .routes").html('');
     var handler = new API_handler();
     //handler.handle(locations);
     handler.data = data_test;
@@ -310,8 +314,7 @@ function calculateAndDisplayRoute(directionsService, directionsDisplay, toll, hi
       var duration = 0;
       // For each route, display summary information.
       $('#gmap_response .spinner').css('display', 'none');
-      $('#gmap_response .heading').html("");
-      $('#gmap_response .routes').html("");
+      $('#gmap_response .heading, #gmap_response .routes').html("");
       for (var i = 0; i < route.legs.length; i++) {
         if (route.legs[i].start_address != route.legs[i].end_address) {
           distance += route.legs[i].distance.value;
