@@ -3,7 +3,6 @@ var locations = [];
 function initMap() {
   var directionsService = new google.maps.DirectionsService;
   var directionsDisplay = new google.maps.DirectionsRenderer;
-  var travel_mode = google.maps.TravelMode.DRIVING;
   
   var toll = false, highway = false;
   var start_end = ['', ''];
@@ -100,24 +99,14 @@ function initMap() {
     }
   });
   
-  // Sets a listener on a radio button to change the filter type on Places
-  // Autocomplete.
-  function setupClickListener(id, mode) {
-    var radioButton = document.getElementById(id);
-    radioButton.addEventListener('click', function() {
-      travel_mode = mode;
-    });
-  }
-  setupClickListener('changemode-driving', google.maps.TravelMode.DRIVING);
-  
   directionsDisplay.setMap(map);
   
   document.getElementById('submit').addEventListener('click', function() {
     if ($('#submit').hasClass('disabled')) {
-      $('#search-warning p').html('<span class="glyphicon glyphicon-exclamation-sign"></span> You have to add at least two locations.')
+      $('#search-warning p').html('<span class="glyphicon glyphicon-exclamation-sign"></span> You have to add at least three locations.')
       $('#search-warning').modal();
     } else {
-      calculateAndDisplayRoute(directionsService, directionsDisplay, travel_mode, toll, highway);
+      calculateAndDisplayRoute(directionsService, directionsDisplay, toll, highway);
     }
   });
   
@@ -289,7 +278,7 @@ function displayResults(results, handler) {
   });
 }
 
-function calculateAndDisplayRoute(directionsService, directionsDisplay, travel_mode, toll, highway) {
+function calculateAndDisplayRoute(directionsService, directionsDisplay, toll, highway) {
   var waypts = [];
   for (var i = 0; i < locations.length; i++) {
       waypts.push({
@@ -305,9 +294,10 @@ function calculateAndDisplayRoute(directionsService, directionsDisplay, travel_m
     optimizeWaypoints: true,
     avoidHighways: highway,
     avoidTolls: toll,
-    travelMode: travel_mode
+    travelMode: google.maps.TravelMode.DRIVING
   }, function(response, status) {
     if (status === google.maps.DirectionsStatus.OK) {
+      console.log(response);
       directionsDisplay.setDirections(response);
       var route = response.routes[0];
       var summaryPanel = document.getElementById('directions-panel');
@@ -329,7 +319,7 @@ function calculateAndDisplayRoute(directionsService, directionsDisplay, travel_m
 }
 
 function enableSubmit(locations) {
-  if (locations.length > 1) {
+  if (locations.length > 2) {
     if($('#submit').hasClass('disabled')) {
       $('#submit').removeClass('disabled');
     }
