@@ -7,6 +7,7 @@ function initMap() {
   var toll = false, highway = false;
   var start_end = ['', ''];
   
+  var results;
   var poly = {
     cheapest: undefined,
     fatest: undefined,
@@ -42,16 +43,7 @@ function initMap() {
     var place = placeGet;
     if (place == undefined) {
       // An element has been remove
-      ["cheapest", "fatest", "shortest"].forEach(function(value) {
-        if (poly[value] != undefined) {
-          poly[value].setMap(null);
-          poly[value] = undefined;
-          for(var i = 0; i < markers_transit[value].length; i++)
-            markers_transit[value][i].setMap(null);
-          markers_transit[value] = [];
-        }
-      });
-      setMapOnAll(null);
+      cleanMap();
     } else if (!place.geometry) {
       $('#search-warning p').html('<span class="glyphicon glyphicon-exclamation-sign"></span> Please select one place in the list.')
       $('#search-warning').modal();
@@ -131,7 +123,7 @@ function initMap() {
         $("#gmap_response").css('display', 'none');
         $("#directions-panel").css('display', 'block');
         $("#directions-panel .heading, #directions-panel .routes").html('');
-        var results = transitCall(locations, start_end);
+        results = transitCall(locations, start_end);
         setMapOnAll(null);
         var drawing = drawLines(results.cheapest, map);
         poly.cheapest = drawing.poly;
@@ -198,6 +190,29 @@ function initMap() {
     } else {
       target[0].nextSibling.className = 'collapse';
     }
+  });
+  
+  function cleanMap() {
+    ["cheapest", "fatest", "shortest"].forEach(function(value) {
+      if (poly[value] != undefined) {
+        poly[value].setMap(null);
+        poly[value] = undefined;
+        for(var i = 0; i < markers_transit[value].length; i++)
+          markers_transit[value][i].setMap(null);
+        markers_transit[value] = [];
+      }
+    });
+    setMapOnAll(null);
+  }
+  
+  $('#directions-panel .nav a').click(function (e) {
+    e.preventDefault();
+    $(this).tab('show');
+    cleanMap();
+    var value = $(this).attr('href').substring(1);
+    var drawing = drawLines(results[value], map);
+    poly[value] = drawing.poly;
+    markers_transit[value] = drawing.markers;
   });
 }
 
@@ -445,8 +460,3 @@ $('body').popover({selector: '[data-popover]', trigger: 'manual', animation: fal
         }
     }, 100);
 });
-  
-$('#directions-panel .nav a').click(function (e) {
-  e.preventDefault();
-  $(this).tab('show');
-})
