@@ -106,10 +106,16 @@ function initMap() {
       $('#search-warning p').html('<span class="glyphicon glyphicon-exclamation-sign"></span> You have to add at least three locations.')
       $('#search-warning').modal();
     } else {
-      $("#directions-panel").css('display', 'none');
-      $('#gmap_response').css('display', 'block');
-      console.log($('input[name="travel-mode"]:checked').val());
-      calculateAndDisplayRoute(directionsService, directionsDisplay, toll, highway);
+      if($('input[name="travel-mode"]:checked').val() == 'car') {
+        $("#directions-panel").css('display', 'none');
+        $('#gmap_response').css('display', 'block');
+        calculateAndDisplayRoute(directionsService, directionsDisplay, toll, highway);
+      } else { // transit
+        $("#gmap_response").css('display', 'none');
+        $("#directions-panel").css('display', 'block');
+        $("#directions-panel .heading, #directions-panel .routes").html('');
+        transitCall(locations, start_end);
+      }
     }
   });
   
@@ -172,46 +178,43 @@ function initMap() {
       target[0].nextSibling.className = 'collapse';
     }
   });
+}
+
+function transitCall(locations, start_end){
+  var handler = new API_handler();
+  //handler.handle(locations);
+  handler.data = data_test;
+  var matrices = {
+    cheapest: [],
+    fatest: [],
+    shortest: []
+  };
   
-  $("#rome2rio").click(function(){
-    $("#gmap_response").css('display', 'none');
-    $("#directions-panel").css('display', 'block');
-    $("#directions-panel .heading, #directions-panel .routes").html('');
-    var handler = new API_handler();
-    //handler.handle(locations);
-    handler.data = data_test;
-    var matrices = {
-      cheapest: [],
-      fatest: [],
-      shortest: []
-    };
-    
-    ["cheapest", "fatest", "shortest"].forEach(function(value) {
-      if (start_end[0] != start_end[1]) {
-        matrices[value] = handler.addDummyNode(handler.getMatrix(value), start_end[0], start_end[1]);
-      } else {
-        matrices[value] = handler.getMatrix(value);
-      }
-    });
-        
-    var solver = new ATSP();
-    var results = {
-      cheapest: [],
-      fatest: [],
-      shortest: []
-    };
-    
-    $.each(matrices, function(key, matrix) {
-      solver.anneal(matrix, start_end[0]);
-      var result = [];
-      for (var j = 0; j < solver.currentOrder.length - 1; j++) {
-        result.push(matrix[solver.currentOrder[j]][solver.currentOrder[j + 1]]);
-      }
-      result.push(matrix[solver.currentOrder[solver.currentOrder.length - 1]][solver.currentOrder[0]]);
-      results[key] = result;
-    });
-    displayResults(results, handler);
+  ["cheapest", "fatest", "shortest"].forEach(function(value) {
+    if (start_end[0] != start_end[1]) {
+      matrices[value] = handler.addDummyNode(handler.getMatrix(value), start_end[0], start_end[1]);
+    } else {
+      matrices[value] = handler.getMatrix(value);
+    }
   });
+      
+  var solver = new ATSP();
+  var results = {
+    cheapest: [],
+    fatest: [],
+    shortest: []
+  };
+  
+  $.each(matrices, function(key, matrix) {
+    solver.anneal(matrix, start_end[0]);
+    var result = [];
+    for (var j = 0; j < solver.currentOrder.length - 1; j++) {
+      result.push(matrix[solver.currentOrder[j]][solver.currentOrder[j + 1]]);
+    }
+    result.push(matrix[solver.currentOrder[solver.currentOrder.length - 1]][solver.currentOrder[0]]);
+    results[key] = result;
+  });
+  displayResults(results, handler);
 }
 
 function getGlyph(kind) {
@@ -315,7 +318,7 @@ function calculateAndDisplayRoute(directionsService, directionsDisplay, toll, hi
       var duration = 0;
       // For each route, display summary information.
       $('#gmap_response .spinner').css('display', 'none');
-      $('#gmap_response .heading, #gmap_response .routes').html("");
+      $('#gmap_response .heading, #gmap_response .routes').html('');
       for (var i = 0; i < route.legs.length; i++) {
         if (route.legs[i].start_address != route.legs[i].end_address) {
           distance += route.legs[i].distance.value;
