@@ -7,6 +7,17 @@ function initMap() {
   var toll = false, highway = false;
   var start_end = ['', ''];
   
+  var poly = {
+    cheapest: undefined,
+    fatest: undefined,
+    shortest: undefined
+  };
+  var markers_transit = {
+    cheapest: [],
+    fatest: [],
+    shortest: []
+  };
+  
   var map = new google.maps.Map(document.getElementById('map'), {
     center: {lat: 25, lng: 0},
     zoom: 2
@@ -22,9 +33,8 @@ function initMap() {
   var markers = [], bounds;
   
   function setMapOnAll(map) {
-    for (var i = 0; i < markers.length; i++) {
+    for (var i = 0; i < markers.length; i++)
       markers[i].setMap(map);
-    }
     markers = [];
   }
   
@@ -32,6 +42,15 @@ function initMap() {
     var place = placeGet;
     if (place == undefined) {
       // An element has been remove
+      ["cheapest", "fatest", "shortest"].forEach(function(value) {
+        if (poly[value] != undefined) {
+          poly[value].setMap(null);
+          poly[value] = undefined;
+          for(var i = 0; i < markers_transit[value].length; i++)
+            markers_transit[value][i].setMap(null);
+          markers_transit[value] = [];
+        }
+      });
       setMapOnAll(null);
     } else if (!place.geometry) {
       $('#search-warning p').html('<span class="glyphicon glyphicon-exclamation-sign"></span> Please select one place in the list.')
@@ -39,7 +58,6 @@ function initMap() {
       return;
     } else {
       input.value = "";
-      
       var element = [place.name, place.geometry.location.lat(), place.geometry.location.lng()];
       for(var i = 0; i < locations.length; i++) {
         if (locations[i][0] == element[0] && locations[i][1] == element[1] && locations[i][2] == element[2]) {
@@ -98,7 +116,6 @@ function initMap() {
       $('#search-warning').modal();
     }
   });
-  
   directionsDisplay.setMap(map);
   
   document.getElementById('submit').addEventListener('click', function() {
@@ -114,7 +131,11 @@ function initMap() {
         $("#gmap_response").css('display', 'none');
         $("#directions-panel").css('display', 'block');
         $("#directions-panel .heading, #directions-panel .routes").html('');
-        transitCall(locations, start_end);
+        var results = transitCall(locations, start_end);
+        setMapOnAll(null);
+        var drawing = drawLines(results.cheapest, map);
+        poly.cheapest = drawing.poly;
+        markers_transit.cheapest = drawing.markers;
       }
     }
   });
@@ -180,6 +201,42 @@ function initMap() {
   });
 }
 
+function drawLines(result, map) {
+  var labels = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  var labelIndex = 0;
+  var location, position;
+  var markers = [];
+  
+  var poly = new google.maps.Polyline({
+    strokeColor: '#337ab7',
+    strokeOpacity: 0.8,
+    strokeWeight: 3
+  });
+  poly.setMap(map);
+  
+  var path = poly.getPath();
+  
+  for(var i = 0; i < result.length; i++) {
+    location = result[i][0].split('_');
+    position = new google.maps.LatLng(location[1], location[2]);
+    path.push(position);
+  
+    var marker = new google.maps.Marker({
+      position: position,
+      label: labels[labelIndex++ % labels.length],
+      map: map
+    });
+    markers.push(marker);
+  }
+  location = result[0][0].split('_');
+  path.push(new google.maps.LatLng(location[1], location[2]));
+  
+  return {
+    poly: poly,
+    markers: markers
+  };
+}
+
 function transitCall(locations, start_end){
   var handler = new API_handler();
   //handler.handle(locations);
@@ -215,6 +272,7 @@ function transitCall(locations, start_end){
     results[key] = result;
   });
   displayResults(results, handler);
+  return results;
 }
 
 function getGlyph(kind) {
