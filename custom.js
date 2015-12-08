@@ -118,6 +118,7 @@ function initMap() {
       if($('input[name="travel-mode"]:checked').val() == 'car') {
         $("#directions-panel").css('display', 'none');
         $('#gmap_response').css('display', 'block');
+        cleanMap();
         calculateAndDisplayRoute(directionsService, directionsDisplay, toll, highway);
       } else { // transit
         $("#gmap_response").css('display', 'none');
@@ -189,6 +190,28 @@ function initMap() {
       target[0].nextSibling.className += ' in';
     } else {
       target[0].nextSibling.className = 'collapse';
+    }
+  });
+  
+  $(document).on('click', '#gmap_response .routes .list-group-item', function(ev) {
+    var target = $(ev.target);
+    if (target[0].nextSibling.className == 'modal fade') {
+      target[0].nextSibling.className += ' in';
+      target[0].nextSibling.style.display = 'block';
+    } else {
+      target[0].nextSibling.className = 'modal fade';
+      target[0].nextSibling.style.display = 'none';
+    }
+  });
+  
+  $(document).on('click', '#gmap_response .routes .in', function(ev) {
+    var target = $(ev.target);
+    if (target[0].className == 'modal fade in') {
+      target[0].className = 'modal fade';
+      target[0].style.display = 'none';
+    } else if (target[0].className == 'close') {
+      target[0].parentNode.parentNode.parentNode.parentNode.parentNode.className = 'modal fade';
+      target[0].parentNode.parentNode.parentNode.parentNode.parentNode.style.display = 'none';
     }
   });
   
@@ -392,7 +415,7 @@ function calculateAndDisplayRoute(directionsService, directionsDisplay, toll, hi
     if (status === google.maps.DirectionsStatus.OK) {
       directionsDisplay.setDirections(response);
       var route = response.routes[0];
-      var html = "";
+      var html;
       var distance = 0;
       var duration = 0;
       // For each route, display summary information.
@@ -406,7 +429,17 @@ function calculateAndDisplayRoute(directionsService, directionsDisplay, toll, hi
           if (parseInt(time_span[2]) < 10) {
             time_span[2] = "0" + time_span[2];
           }
-          html = '<div class="list-group-item">' + route.legs[i].start_address.split(',')[0] + ' - ' + route.legs[i].end_address.split(',')[0] + '<br>' + time_span[0] + 'h' + time_span[2] + '<span class="pull-right">' + Math.round(route.legs[i].distance.value/1000).toString() + ' kms </span>' + '</div>';
+          html = '<div class="list-group-item" type="button">' + route.legs[i].start_address.split(',')[0] + ' - ' + route.legs[i].end_address.split(',')[0] + '<br>' + time_span[0] + 'h' + time_span[2] + '<span class="pull-right">' + Math.round(route.legs[i].distance.value/1000).toString() + ' kms </span>' + '</div>';
+          html += '<div class="modal fade" tabindex="-1" role="dialog">' +
+                    '<div class="modal-dialog">' +
+                      '<div class="modal-content">' +
+                        '<div class="modal-header">' + 
+                          '<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span class="close" aria-hidden="true">&times;</span></button>' +
+                          '<h4 class="modal-title">Modal title</h4>' +
+                        '</div>' +
+                        '<div class="modal-body">' +
+                          '<p>One fine body&hellip;</p>' +
+                        '</div></div></div></div>'
            $('#gmap_response .routes').append(html);
         }
       }
