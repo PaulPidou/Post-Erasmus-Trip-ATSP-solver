@@ -124,7 +124,7 @@ function initMap() {
         $("#directions-panel").css('display', 'block');
         $("#directions-panel .heading, #directions-panel .routes").html('');
         results = transitCall(locations, start_end);
-        setMapOnAll(null);
+        cleanMap();
         var drawing = drawLines(results.cheapest, map);
         poly.cheapest = drawing.poly;
         markers_transit.cheapest = drawing.markers;
@@ -221,6 +221,7 @@ function drawLines(result, map) {
   var labelIndex = 0;
   var location, position;
   var markers = [];
+  var start_end = true;
   
   var poly = new google.maps.Polyline({
     strokeColor: '#337ab7',
@@ -232,19 +233,25 @@ function drawLines(result, map) {
   var path = poly.getPath();
   
   for(var i = 0; i < result.length; i++) {
-    location = result[i][0].split('_');
-    position = new google.maps.LatLng(location[1], location[2]);
-    path.push(position);
-  
-    var marker = new google.maps.Marker({
-      position: position,
-      label: labels[labelIndex++ % labels.length],
-      map: map
-    });
-    markers.push(marker);
+    if (result[i][0] != '#') {
+      location = result[i][0].split('_');
+      position = new google.maps.LatLng(location[1], location[2]);
+      path.push(position);
+    
+      var marker = new google.maps.Marker({
+        position: position,
+        label: labels[labelIndex++ % labels.length],
+        map: map
+      });
+      markers.push(marker);
+    } else {
+      start_end = false;
+    }
   }
-  location = result[0][0].split('_');
-  path.push(new google.maps.LatLng(location[1], location[2]));
+  if (start_end) {
+    location = result[0][0].split('_');
+    path.push(new google.maps.LatLng(location[1], location[2]));
+  }
   
   return {
     poly: poly,
@@ -327,7 +334,7 @@ function displayResults(results, handler) {
     duration = 0, price = 0, distance = 0;
     console.log(key);
       for (var i = 0; i < list.length; i++) {
-        for(var j = 0; j < list.length; j++) {
+        for(var j = 0; j < handler.indexes[key].length; j++) {
           if (list[i][0] == handler.indexes[key][j][0][0]) {
             for(var k = 0; k < handler.indexes[key][j].length; k++) {
               if (list[i][1] == handler.indexes[key][j][k][1]) {
@@ -383,7 +390,6 @@ function calculateAndDisplayRoute(directionsService, directionsDisplay, toll, hi
     travelMode: google.maps.TravelMode.DRIVING
   }, function(response, status) {
     if (status === google.maps.DirectionsStatus.OK) {
-      console.log(response);
       directionsDisplay.setDirections(response);
       var route = response.routes[0];
       var html = "";
