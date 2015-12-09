@@ -120,6 +120,17 @@ function initMap() {
         $('#gmap_response').css('display', 'block');
         cleanMap();
         calculateAndDisplayRoute(directionsService, directionsDisplay, toll, highway);
+        var modals = document.getElementsByClassName('display_route_map');
+        //
+        var getModals = setInterval (function(){
+          if (modals.length == locations.length) {
+              clearInterval(getModals);
+              for(var i = 0; i < modals.length; i++) {
+                var s_e = modals[i].title.split('_'); 
+                initMapModal(modals[i].firstChild.lastChild, modals[i].firstChild.firstChild, s_e[0], s_e[1], toll, highway);
+              }
+          }
+        }, 10);
       } else { // transit
         $("#gmap_response").css('display', 'none');
         $("#directions-panel").css('display', 'block');
@@ -184,27 +195,18 @@ function initMap() {
     }
   });
   
-  $(document).on('click', '#directions-panel .tab-content .routes .list-group-item', function(ev) {
-    var target = $(ev.target);
-    if (target[0].nextSibling.className == 'collapse') {
-      target[0].nextSibling.className += ' in';
-    } else {
-      target[0].nextSibling.className = 'collapse';
-    }
-  });
-  
-  $(document).on('click', '#gmap_response .routes .list-group-item', function(ev) {
+  $(document).on('click', '#directions-panel .tab-content .routes .list-group-item, #gmap_response .routes .list-group-item', function(ev) {
     var target = $(ev.target);
     if (target[0].nextSibling.className == 'modal fade') {
       target[0].nextSibling.className += ' in';
       target[0].nextSibling.style.display = 'block';
-    } else {
-      target[0].nextSibling.className = 'modal fade';
-      target[0].nextSibling.style.display = 'none';
+      window.setTimeout(function () {
+        google.maps.event.trigger(map, 'resize')
+      }, 0);
     }
   });
   
-  $(document).on('click', '#gmap_response .routes .in', function(ev) {
+  $(document).on('click', function(ev) {
     var target = $(ev.target);
     if (target[0].className == 'modal fade in') {
       target[0].className = 'modal fade';
@@ -431,15 +433,15 @@ function calculateAndDisplayRoute(directionsService, directionsDisplay, toll, hi
           }
           html = '<div class="list-group-item" type="button">' + route.legs[i].start_address.split(',')[0] + ' - ' + route.legs[i].end_address.split(',')[0] + '<br>' + time_span[0] + 'h' + time_span[2] + '<span class="pull-right">' + Math.round(route.legs[i].distance.value/1000).toString() + ' kms </span>' + '</div>';
           html += '<div class="modal fade" tabindex="-1" role="dialog">' +
-                    '<div class="modal-dialog">' +
+                    '<div class="modal-dialog modal-lg">' +
                       '<div class="modal-content">' +
                         '<div class="modal-header">' + 
                           '<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span class="close" aria-hidden="true">&times;</span></button>' +
-                          '<h4 class="modal-title">Modal title</h4>' +
+                          '<h4 class="modal-title">' + route.legs[i].start_address.split(',')[0] + ' - ' + route.legs[i].end_address.split(',')[0] + '</h4>' +
                         '</div>' +
-                        '<div class="modal-body">' +
-                          '<p>One fine body&hellip;</p>' +
-                        '</div></div></div></div>'
+                        '<div class="modal-body display_route_map" title="' +route.legs[i].start_address + '_' + route.legs[i].end_address + '"><div class="row">' +
+                        '<div class="right-panel"></div><div class="map_modal"></div>' +
+                        '</div></div></div></div></div>'
            $('#gmap_response .routes').append(html);
         }
       }
@@ -499,3 +501,36 @@ $('body').popover({selector: '[data-popover]', trigger: 'manual', animation: fal
         }
     }, 100);
 });
+  
+function initMapModal(map_modal, panel_element, start, end, highway, toll) {
+  var directionsDisplay = new google.maps.DirectionsRenderer;
+  var directionsService = new google.maps.DirectionsService;
+  var map = new google.maps.Map(map_modal, {
+    center: {lat: 25, lng: 0},
+    zoom: 2
+  });
+  directionsDisplay.setMap(map);
+  directionsDisplay.setPanel(panel_element);
+
+  calculateAndDisplayRouteModal(directionsService, directionsDisplay, start, end, highway, toll);
+  
+  return {
+    map: map,
+  }
+}
+
+function calculateAndDisplayRouteModal(directionsService, directionsDisplay, start, end, highway, toll) {
+  directionsService.route({
+    origin: start,
+    destination: end,
+    avoidHighways: highway,
+    avoidTolls: toll,
+    travelMode: google.maps.TravelMode.DRIVING
+  }, function(response, status) {
+    if (status === google.maps.DirectionsStatus.OK) {
+      directionsDisplay.setDirections(response);
+    } else {
+      $('#route-warning').modal();
+    }
+  });
+}

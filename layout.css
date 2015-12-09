@@ -12,7 +12,6 @@ html, body {height: 100%;margin: 0;padding: 0;}
   width: 25%;
   text-align: left;
 }
-#directions-panel .modal .modal-content, #gmap_response .modal .modal-content {z-index: 2000;}
 #pac-input {border-bottom-left-radius:0px; border-bottom-right-radius:0px;border-bottom:0px;}
 #left-panel input {font-size: 15px;}
 #toll span, #highway span {display: none;}
@@ -39,4 +38,37 @@ html, body {height: 100%;margin: 0;padding: 0;}
 .spinner .bounce2 {-webkit-animation-delay: -0.16s;animation-delay: -0.16s;}
 @-webkit-keyframes sk-bouncedelay {0%, 80%, 100% { -webkit-transform: scale(0) }40% { -webkit-transform: scale(1.0) }}
 @keyframes sk-bouncedelay {0%, 80%, 100% { -webkit-transform: scale(0);transform: scale(0);} 40% { -webkit-transform: scale(1.0);transform: scale(1.0);}}
+.modal-body {
+  padding: 0px 15px;
+}
+.map_modal {
+  height: 500px;
+}
+.right-panel {
+  font-family: 'Roboto','sans-serif';
+  line-height: 30px;
+}
+
+.right-panel select, .right-panel input {
+  font-size: 15px;
+}
+
+.right-panel select {
+  width: 100%;
+}
+
+.right-panel i {
+  font-size: 12px;
+}
+
+.map_modal {
+  margin-right: 260px;
+}
+
+.right-panel {
+  height: 500px;
+  float: right;
+  width: 260px;
+  overflow: auto;
+}
 
