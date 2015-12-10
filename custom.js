@@ -42,7 +42,6 @@ function initMap() {
   function setMarkers(placeGet) {
     var place = placeGet;
     if (place == undefined) {
-      // An element has been remove
       cleanMap();
     } else if (!place.geometry) {
       $('#search-warning p').html('<span class="glyphicon glyphicon-exclamation-sign"></span> Please select one place in the list.')
@@ -50,7 +49,7 @@ function initMap() {
       return;
     } else {
       input.value = "";
-      var element = [place.name, place.geometry.location.lat(), place.geometry.location.lng()];
+      var element = [place.name, place.geometry.location.lat(), place.geometry.location.lng(), place.formatted_address];
       for(var i = 0; i < locations.length; i++) {
         if (locations[i][0] == element[0] && locations[i][1] == element[1] && locations[i][2] == element[2]) {
           $('#search-warning p').html('<span class="glyphicon glyphicon-exclamation-sign"></span> This place is already added.')
@@ -82,7 +81,7 @@ function initMap() {
       if (id == start_end[1]) {
         text += ' end ';
       }
-        text += '" id="' + id + '"><span class="glyphicon glyphicon-map-marker"></span> ' + locations[i][0] + ' <span class="start-glyph glyphicon glyphicon-home"></span><span class="end-glyph glyphicon glyphicon-flag"></span><span class="glyphicon glyphicon-trash remove pull-right"></span> <span class="glyphicon glyphicon-option-vertical pull-right settings" data-popover="true" data-container="body" data-toggle="popover" data-placement="top" data-html=true data-content="<div class=\'list-group\'><a href=\'#\' class=\'list-group-item start-link\'><span class=\'glyphicon glyphicon-home\'></span> Set as starting point</a><a href=\'#\' class=\'list-group-item end-link\'><span class=\'glyphicon glyphicon-flag\'></span> Set as arriving point</a><div>"></span></a>';
+        text += '" id="' + id + '" title="' + locations[i][3] + '"><span class="glyphicon glyphicon-map-marker"></span> ' + locations[i][0] + ' <span class="start-glyph glyphicon glyphicon-home"></span><span class="end-glyph glyphicon glyphicon-flag"></span><span class="glyphicon glyphicon-trash remove pull-right"></span> <span class="glyphicon glyphicon-option-vertical pull-right settings" data-popover="true" data-container="body" data-toggle="popover" data-placement="top" data-html=true data-content="<div class=\'list-group\'><a href=\'#\' class=\'list-group-item start-link\'><span class=\'glyphicon glyphicon-home\'></span> Set as starting point</a><a href=\'#\' class=\'list-group-item end-link\'><span class=\'glyphicon glyphicon-flag\'></span> Set as arriving point</a><div>"></span></a>';
     }
     
     if (locations.length == 1) {
@@ -399,15 +398,17 @@ function displayResults(results, handler) {
 function calculateAndDisplayRoute(directionsService, directionsDisplay, toll, highway) {
   var waypts = [];
   for (var i = 0; i < locations.length; i++) {
+    if (document.getElementsByClassName('start')[0].title != locations[i][3] && document.getElementsByClassName('end')[0].title != locations[i][3]) {
       waypts.push({
-        location: locations[i][0],
+        location: locations[i][3],
         stopover: true
       });
+    }
   }
 
   directionsService.route({
-    origin: document.getElementsByClassName('start')[0].textContent,
-    destination: document.getElementsByClassName('end')[0].textContent,
+    origin: document.getElementsByClassName('start')[0].title,
+    destination: document.getElementsByClassName('end')[0].title,
     waypoints: waypts,
     optimizeWaypoints: true,
     avoidHighways: highway,
