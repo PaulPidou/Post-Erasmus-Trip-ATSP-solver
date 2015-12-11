@@ -41,13 +41,12 @@ function initMap() {
   
   function setMarkers(placeGet) {
     var place = placeGet;
-    if (place == undefined) {
-      cleanMap();
-    } else if (!place.geometry) {
+    if (!place.geometry) {
       $('#search-warning p').html('<span class="glyphicon glyphicon-exclamation-sign"></span> Please select one place in the list.')
       $('#search-warning').modal();
       return;
     } else {
+      cleanMap();
       input.value = "";
       var element = [place.name, place.geometry.location.lat(), place.geometry.location.lng(), place.formatted_address];
       for(var i = 0; i < locations.length; i++) {
@@ -107,20 +106,19 @@ function initMap() {
       $('#search-warning').modal();
     }
   });
-  directionsDisplay.setMap(map);
   
   document.getElementById('submit').addEventListener('click', function() {
     if ($('#submit').hasClass('disabled')) {
       $('#search-warning p').html('<span class="glyphicon glyphicon-exclamation-sign"></span> You have to add at least three locations.')
       $('#search-warning').modal();
     } else {
+      cleanMap();
       if($('input[name="travel-mode"]:checked').val() == 'car') {
         $("#directions-panel").css('display', 'none');
         $('#gmap_response').css('display', 'block');
-        cleanMap();
+        directionsDisplay.setMap(map);
         calculateAndDisplayRoute(directionsService, directionsDisplay, toll, highway);
         var modals = document.getElementsByClassName('display_route_map');
-        //
         var getModals = setInterval (function(){
           if (modals.length == locations.length) {
               clearInterval(getModals);
@@ -135,7 +133,6 @@ function initMap() {
         $("#directions-panel").css('display', 'block');
         $("#directions-panel .heading, #directions-panel .routes").html('');
         results = transitCall(locations, start_end);
-        cleanMap();
         var drawing = drawLines(results.cheapest, map);
         poly.cheapest = drawing.poly;
         markers_transit.cheapest = drawing.markers;
@@ -226,6 +223,7 @@ function initMap() {
         markers_transit[value] = [];
       }
     });
+    directionsDisplay.setMap(null);
     setMapOnAll(null);
   }
   

@@ -27,7 +27,7 @@ html, body {height: 100%;margin: 0;padding: 0;}
 #directions-panel, #gmap_response {margin-top: 20px;width: 100%;display: none;}
 #directions-panel .tab-content, #gmap_response {overflow: auto;}
 #directions-panel .tab-content .routes .list-group-item, #gmap_response .routes .list-group-item {padding: 10px 15px;border: 1px solid #ddd;cursor: pointer;}
-#directions-panel .tab-content .routes .list-group-item:hover {background-color: #e6e6e6;}
+#directions-panel .tab-content .routes .list-group-item:hover, #gmap_response .routes .list-group-item:hover {background-color: #e6e6e6;}
 #directions-panel .heading .list-group, #gmap_response .heading .list-group {margin-top: 5px; margin-bottom: 10px;}
 #directions-panel .heading .list-group-item, #gmap_response .heading .list-group-item {border: none;padding: 5px 15px;}
 .list-group-item:focus {background-image: none;outline: 0;-webkit-box-shadow: none; box-shadow: none;}
