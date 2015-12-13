@@ -121,8 +121,8 @@ function initMap() {
         calculateAndDisplayRoute(directionsService, directionsDisplay, toll, highway);
         modalMaps = [];
         var modals = document.getElementsByClassName('display_route_map');
-        var getModals = setInterval (function(){
-          if (modals.length == locations.length) {
+        var getModals = setInterval (function() {
+          if ((modals.length == locations.length && start_end[0] == start_end[1]) || (modals.length == locations.length-1 && start_end[0] != start_end[1])) {
               clearInterval(getModals);
               for(var i = 0; i < modals.length; i++) {
                 var elmModal = {};
