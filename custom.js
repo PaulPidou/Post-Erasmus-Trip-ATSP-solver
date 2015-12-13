@@ -1,4 +1,5 @@
 var locations = [];
+var modalMaps = [];
 
 function initMap() {
   var directionsService = new google.maps.DirectionsService;
@@ -118,13 +119,16 @@ function initMap() {
         $('#gmap_response').css('display', 'block');
         directionsDisplay.setMap(map);
         calculateAndDisplayRoute(directionsService, directionsDisplay, toll, highway);
+        modalMaps = [];
         var modals = document.getElementsByClassName('display_route_map');
         var getModals = setInterval (function(){
           if (modals.length == locations.length) {
               clearInterval(getModals);
               for(var i = 0; i < modals.length; i++) {
-                var s_e = modals[i].title.split('_'); 
-                initMapModal(modals[i].firstChild.lastChild, modals[i].firstChild.firstChild, s_e[0], s_e[1], toll, highway);
+                var elmModal = {};
+                elmModal.title = modals[i].title;
+                elmModal.first = true;
+                modalMaps.push(elmModal);
               }
           }
         }, 10);
@@ -196,9 +200,17 @@ function initMap() {
     if (target[0].nextSibling.className == 'modal fade') {
       target[0].nextSibling.className += ' in';
       target[0].nextSibling.style.display = 'block';
-      window.setTimeout(function () {
-        google.maps.event.trigger(map, 'resize')
-      }, 0);
+      var modal_body = target[0].nextSibling.firstChild.firstChild.lastChild;
+      for (var i = 0; i < modalMaps.length; i++) {
+        if (modalMaps[i].title == modal_body.title) {
+          if (modalMaps[i].first) {
+            var s_e = modal_body.title.split('_');
+            initMapModal(modal_body.firstChild.lastChild, modal_body.firstChild.firstChild, s_e[0], s_e[1], toll, highway);
+            modalMaps[i].first = false;
+          }
+          break;
+        }
+      }
     }
   });
   
@@ -438,7 +450,7 @@ function calculateAndDisplayRoute(directionsService, directionsDisplay, toll, hi
                           '<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span class="close" aria-hidden="true">&times;</span></button>' +
                           '<h4 class="modal-title">' + route.legs[i].start_address.split(',')[0] + ' - ' + route.legs[i].end_address.split(',')[0] + '</h4>' +
                         '</div>' +
-                        '<div class="modal-body display_route_map" title="' +route.legs[i].start_address + '_' + route.legs[i].end_address + '"><div class="row">' +
+                        '<div class="modal-body display_route_map" title="' + route.legs[i].start_address + '_' + route.legs[i].end_address + '"><div class="row">' +
                         '<div class="right-panel"></div><div class="map_modal"></div>' +
                         '</div></div></div></div></div>'
            $('#gmap_response .routes').append(html);
@@ -506,16 +518,12 @@ function initMapModal(map_modal, panel_element, start, end, highway, toll) {
   var directionsService = new google.maps.DirectionsService;
   var map = new google.maps.Map(map_modal, {
     center: {lat: 25, lng: 0},
-    zoom: 2
+    zoom: 3
   });
   directionsDisplay.setMap(map);
   directionsDisplay.setPanel(panel_element);
 
   calculateAndDisplayRouteModal(directionsService, directionsDisplay, start, end, highway, toll);
-  
-  return {
-    map: map,
-  }
 }
 
 function calculateAndDisplayRouteModal(directionsService, directionsDisplay, start, end, highway, toll) {
