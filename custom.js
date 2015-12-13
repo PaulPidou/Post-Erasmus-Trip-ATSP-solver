@@ -42,24 +42,25 @@ function initMap() {
   
   function setMarkers(placeGet) {
     var place = placeGet;
-    if (!place.geometry) {
-      $('#search-warning p').html('<span class="glyphicon glyphicon-exclamation-sign"></span> Please select one place in the list.')
-      $('#search-warning').modal();
-      return;
-    } else {
-      cleanMap();
-      input.value = "";
-      var element = [place.name, place.geometry.location.lat(), place.geometry.location.lng(), place.formatted_address];
-      for(var i = 0; i < locations.length; i++) {
-        if (locations[i][0] == element[0] && locations[i][1] == element[1] && locations[i][2] == element[2]) {
-          $('#search-warning p').html('<span class="glyphicon glyphicon-exclamation-sign"></span> This place is already added.')
-          $('#search-warning').modal();
-          return
+    if (placeGet != undefined) {
+      if (!place.geometry) {
+        $('#search-warning p').html('<span class="glyphicon glyphicon-exclamation-sign"></span> Please select one place in the list.')
+        $('#search-warning').modal();
+        return;
+      } else {
+        input.value = "";
+        var element = [place.name, place.geometry.location.lat(), place.geometry.location.lng(), place.formatted_address];
+        for(var i = 0; i < locations.length; i++) {
+          if (locations[i][0] == element[0] && locations[i][1] == element[1] && locations[i][2] == element[2]) {
+            $('#search-warning p').html('<span class="glyphicon glyphicon-exclamation-sign"></span> This place is already added.')
+            $('#search-warning').modal();
+            return
+          }
         }
+        locations.push(element);
       }
-      locations.push(element);
     }
-    
+    cleanMap();
     bounds = new google.maps.LatLngBounds();
     text = '';
 
@@ -386,9 +387,31 @@ function displayResults(results, handler) {
                 }
                 $('#' + key + ' .list-group').append('<div class="list-group-item">' + from[0] + ' - ' + to[0] + html + '<br>' +
                                                      getDurationString(route.duration) + '<span class="pull-right">' + route.indicativePrice.price.toString() + ' &euro;</span>' + '</div>');
-                html = route.name;
-                $('#' + key + ' .list-group').append('<div class="collapse" id="' + key + list[i][0] + '_' + list[i][1] + '">' + html + '</div>');
-                
+                html = '<div class="modal fade" tabindex="-1" role="dialog">' +
+                        '<div class="modal-dialog modal-lg">' +
+                        '<div class="modal-content">' +
+                        '<div class="modal-header">' + 
+                        '<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span class="close" aria-hidden="true">&times;</span></button>' +
+                        '<h4 class="modal-title">' + from[0] + ' - ' + to[0] + '<small> <span class="glyphicon glyphicon-euro"></span> '  + route.indicativePrice.price.toString() + ' &euro; ' + '<span class="glyphicon glyphicon-resize-small"></span> ' + Math.round(route.distance).toString() + ' kms <span class="glyphicon glyphicon-time"></span> ' + getDurationString(route.duration) +'</small></h4>' +
+                        '</div>' +
+                        '<div class="modal-body display_route_map"><div class="row">' +
+                        '</div><div class="right-panel">';
+                for(var l = 0; l < route.segments.length; l++) {
+                  html += '<div><h5>';
+                  if (route.segments[l].sName != undefined)
+                    html += route.segments[l].sName + ' - ' + route.segments[l].tName;
+                  else
+                    html += route.segments[l].sCode + ' - ' + route.segments[l].tCode;
+                  html += '<span class="badge pull-right"><span class="' + getGlyph(route.segments[l].kind) +  '"></span></span></h5>' +
+                          '<div><span class="glyphicon glyphicon-resize-small"></span> ' + Math.round(route.segments[l].distance).toString() + ' kms <span class="glyphicon glyphicon-time"></span> ' + getDurationString(route.segments[l].duration) +'</div>';
+                  if (route.segments[l].itineraries[0].legs[0].host != undefined)
+                    html += '<div>Get your tickets on <a href="' + route.segments[l].itineraries[0].legs[0].url + '" target="_blank">' + route.segments[l].itineraries[0].legs[0].host + '</a></div></div><hr>';
+                  else 
+                    html += '<div>Looks for the flight <a href="https://www.google.com/search?q=' + route.segments[l].itineraries[0].legs[0].hops[0].airline + '+' + route.segments[l].itineraries[0].legs[0].hops[0].flight + '" target="_blank">' + route.segments[l].itineraries[0].legs[0].hops[0].airline + ' ' + route.segments[l].itineraries[0].legs[0].hops[0].flight + '</a></div></div><hr>';
+                }
+                html += '</div><div class="map_modal">' +
+                        '</div></div></div></div></div>'
+                $('#' + key + ' .list-group').append(html);
                 console.log(list[i][0]);
                 console.log(list[i][1]);
                 console.log(handler.data[handler.indexes[key][j][k][2]][handler.indexes[key][j][k][3]][2].routes[handler.indexes[key][j][k][4]]);
