@@ -423,8 +423,8 @@ function displayResults(results, handler) {
       html = '<ul class="list-group"><li class="list-group-item"><span class="glyphicon glyphicon-euro"></span> Price: ' + price.toString() + ' &euro;</li>' +
              '<li class="list-group-item"><span class="glyphicon glyphicon-resize-small"></span> Distance: ' + Math.round(distance).toString() + ' kms </li>' +
              '<li class="list-group-item"><span class="glyphicon glyphicon-time"></span> Duration: ' + getDurationString(duration) + '</li></ul>';
-
       $('#' + key + ' .heading').append(html);
+      $('#directions-panel .tab-content').height($(document).height() - $('.footer').outerHeight() - $('#search-panel').height() - 75 - 42);
   });
 }
 
@@ -482,6 +482,7 @@ function calculateAndDisplayRoute(directionsService, directionsDisplay, toll, hi
       html = '<ul class="list-group"><li class="list-group-item"><span class="glyphicon glyphicon-resize-small"></span> Distance: ' + Math.round(distance/1000).toString() + ' kms </li>' +
              '<li class="list-group-item"><span class="glyphicon glyphicon-time"></span> Duration: ' + getDurationString(duration, true) + '</li></ul>';
       $('#gmap_response .heading').append(html);
+      $('#gmap_response .gmap-content').height($(document).height() - $('.footer').outerHeight() - $('#search-panel').height() - $('#gmap_response .page-header').outerHeight() - 75);
     } else {
       $('#route-warning').modal();
     }
@@ -564,3 +565,5 @@ function calculateAndDisplayRouteModal(directionsService, directionsDisplay, sta
     }
   });
 }
+
+$(function(){ if(window.location.hash) {var hash = window.location.hash;$(hash).modal('toggle');}});

@@ -104,15 +104,62 @@
       </div>
       <div id="gmap_response">
         <div class="page-header text-center">
-          <h1>Summary</h1>
+          <h3>Summary</h3>
         </div>
         <div class="spinner">
           <div class="bounce1"></div>
           <div class="bounce2"></div>
           <div class="bounce3"></div>
         </div>
-        <div class="heading"></div>
-        <div class="routes list-group"></div>
+        <div class="gmap-content">
+          <div class="heading"></div>
+          <div class="routes list-group"></div>
+        </div>
+      </div>
+      <div class="footer text-center">
+        <a href="#"><span class="fa fa-github fa-3x"></span></a><a href="#" data-toggle="modal" data-target="#info"><span class="fa fa-info-circle fa-3x"></span></a><small>Developed by Paul Pidou</small>
+        <div class="modal fade" id="info" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <h4 class="modal-title" id="myModalLabel"><span class="fa fa-info-circle"></span> About the project</h4>
+            </div>
+            <div class="modal-body">
+              <p class="text-justify">
+                Hi everyone, I'm Paul, I'm 22 and I came back from my Erasmus in Rome a few months ago.
+                As most of the Erasmus I really enjoyed this experience and I miss the people I met during it as soon as I came back home.
+                I wanted to find an easy (and cheap) way to meet them back so I decided to develop this tool in order to help me to schedule my next trips around Europe!
+                I hope you will find it useful :)
+              </p>
+              <h3 class="text-left">Usage</h3>
+              <p class="text-justify">
+                To add location to visit, you simply have to search for it thanks to the input field and clic on the place you want on the list.
+                Once added, a place can be set as <strong>start</strong> and/or <strong>end</strong> point of the trip or it can be removed.
+                You can choose between two modes: <strong>car</strong> or <strong>transit</strong>.
+              </p>
+              <h4 class="text-left">Car mode</h4>
+              <p class="text-justify">
+                By selecting the car mode, you would be able to select if you want avoid <strong>highways</strong> and/or <strong>tolls</strong> thanks to the dropdown menu.
+                Once you have added the places you want to visit, just clic on <strong>'Go'</strong> and the fatest road will be automatically displayed after few seconds.
+              </p>
+              <h4 class="text-left">Transit mode</h4>
+              <p class="text-justify">
+                In the transit mode, once you have added the places you want to visit, just clic on <strong>'Go'</strong> and it will automatically displayed three tabs after few seconds.
+                The tabs contains the <strong>cheapest</strong>, <strong>fatest</strong> and <strong>shortest</strong> roads found.
+                <small class="pull-right">The prices displayed are just indicative!</small>
+              </p>
+              <h3 class="text-left">More details</h3>
+              <p class="text-justify">
+                You can obtain more details about a specific road just by clicking on the corresponding summary.
+              </p>
+              <blockquote class="blockquote-reverse">
+                Moments shared here will never return so let's seize them!
+              </blockquote>
+            </div>
+          </div>
+        </div>
+      </div>
       </div>
       </div>
       <div id="map"></div>
