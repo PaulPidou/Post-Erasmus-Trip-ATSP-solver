@@ -1,5 +1,6 @@
 var locations = [];
 var modalMaps = [];
+var modalSegments = {};
 
 function initMap() {
   var directionsService = new google.maps.DirectionsService;
@@ -115,33 +116,35 @@ function initMap() {
       $('#search-warning').modal();
     } else {
       cleanMap();
+      $("#directions-panel .heading, #directions-panel .routes").html('');
+      $("#gmap_response .heading, #gmap_response .routes").html('');
       if($('input[name="travel-mode"]:checked').val() == 'car') {
         $("#directions-panel").css('display', 'none');
         $('#gmap_response').css('display', 'block');
         directionsDisplay.setMap(map);
         calculateAndDisplayRoute(directionsService, directionsDisplay, toll, highway);
-        modalMaps = [];
-        var modals = document.getElementsByClassName('display_route_map');
-        var getModals = setInterval (function() {
-          if ((modals.length == locations.length && start_end[0] == start_end[1]) || (modals.length == locations.length-1 && start_end[0] != start_end[1])) {
-              clearInterval(getModals);
-              for(var i = 0; i < modals.length; i++) {
-                var elmModal = {};
-                elmModal.title = modals[i].title;
-                elmModal.first = true;
-                modalMaps.push(elmModal);
-              }
-          }
-        }, 10);
       } else { // transit
         $("#gmap_response").css('display', 'none');
         $("#directions-panel").css('display', 'block');
-        $("#directions-panel .heading, #directions-panel .routes").html('');
         results = transitCall(locations, start_end);
-        var drawing = drawLines(results.cheapest, map);
-        poly.cheapest = drawing.poly;
-        markers_transit.cheapest = drawing.markers;
+        var draw = drawLines(results.cheapest, map);
+        poly.cheapest = draw.poly;
+        markers_transit.cheapest = draw.markers;
       }
+      modalMaps = [];
+      var modals = document.getElementsByClassName('display_route_map');
+      var getModals = setInterval (function() {
+        if ((((modals.length == locations.length && start_end[0] == start_end[1]) || (modals.length == locations.length-1 && start_end[0] != start_end[1])) && $('input[name="travel-mode"]:checked').val() == 'car') ||
+            (((modals.length == locations.length*3 && start_end[0] == start_end[1]) || (modals.length == (locations.length-1)*3 && start_end[0] != start_end[1])) && $('input[name="travel-mode"]:checked').val() == 'transit')) {
+          clearInterval(getModals);
+          for(var i = 0; i < modals.length; i++) {
+            var elmModal = {};
+            elmModal.title = modals[i].title;
+            elmModal.first = true;
+            modalMaps.push(elmModal);
+          }
+        }
+      }, 10);
     }
   });
   
@@ -202,11 +205,21 @@ function initMap() {
       target[0].nextSibling.className += ' in';
       target[0].nextSibling.style.display = 'block';
       var modal_body = target[0].nextSibling.firstChild.firstChild.lastChild;
+      console.log(modalSegments);
       for (var i = 0; i < modalMaps.length; i++) {
         if (modalMaps[i].title == modal_body.title) {
           if (modalMaps[i].first) {
-            var s_e = modal_body.title.split('_');
-            initMapModal(modal_body.firstChild.lastChild, modal_body.firstChild.firstChild, s_e[0], s_e[1], toll, highway);
+            if (modal_body.title.indexOf('#') > -1) {
+              console.log(modal_body);
+              var modalMap = new google.maps.Map(modal_body.firstChild.lastChild, {
+                center: {lat: 25, lng: 0},
+                zoom: 3
+              });
+              drawLines(modalSegments[modal_body.title], modalMap);
+            } else {
+              var s_e = modal_body.title.split('_');
+              initMapModal(modal_body.firstChild.lastChild, modal_body.firstChild.firstChild, s_e[0], s_e[1], toll, highway);
+            }
             modalMaps[i].first = false;
           }
           break;
@@ -257,6 +270,7 @@ function drawLines(result, map) {
   var location, position;
   var markers = [];
   var start_end = true;
+  var bounds = new google.maps.LatLngBounds();
   
   var poly = new google.maps.Polyline({
     strokeColor: '#337ab7',
@@ -272,6 +286,7 @@ function drawLines(result, map) {
       location = result[i][0].split('_');
       position = new google.maps.LatLng(location[1], location[2]);
       path.push(position);
+      bounds.extend(position);
     
       var marker = new google.maps.Marker({
         position: position,
@@ -287,6 +302,7 @@ function drawLines(result, map) {
     location = result[0][0].split('_');
     path.push(new google.maps.LatLng(location[1], location[2]));
   }
+  map.fitBounds(bounds);
   
   return {
     poly: poly,
@@ -367,7 +383,6 @@ function displayResults(results, handler) {
   $.each(results, function(key, list) {
     $('#' + key + ' .spinner').css('display', 'none');
     duration = 0, price = 0, distance = 0;
-    console.log(key);
       for (var i = 0; i < list.length; i++) {
         for(var j = 0; j < handler.indexes[key].length; j++) {
           if (list[i][0] == handler.indexes[key][j][0][0]) {
@@ -387,6 +402,7 @@ function displayResults(results, handler) {
                 }
                 $('#' + key + ' .list-group').append('<div class="list-group-item">' + from[0] + ' - ' + to[0] + html + '<br>' +
                                                      getDurationString(route.duration) + '<span class="pull-right">' + route.indicativePrice.price.toString() + ' &euro;</span>' + '</div>');
+                var title = key + '#' + list[i][0] + '#' + list[i][1];
                 html = '<div class="modal fade" tabindex="-1" role="dialog">' +
                         '<div class="modal-dialog modal-lg">' +
                         '<div class="modal-content">' +
@@ -394,8 +410,10 @@ function displayResults(results, handler) {
                         '<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span class="close" aria-hidden="true">&times;</span></button>' +
                         '<h4 class="modal-title">' + from[0] + ' - ' + to[0] + '<small> <span class="glyphicon glyphicon-euro"></span> '  + route.indicativePrice.price.toString() + ' &euro; ' + '<span class="glyphicon glyphicon-resize-small"></span> ' + Math.round(route.distance).toString() + ' kms <span class="glyphicon glyphicon-time"></span> ' + getDurationString(route.duration) +'</small></h4>' +
                         '</div>' +
-                        '<div class="modal-body display_route_map"><div class="row">' +
-                        '</div><div class="right-panel">';
+                        '<div class="modal-body display_route_map" title="' + title + '"><div class="row">' +
+                        '<div class="right-panel">';
+                modalSegments[title] = [];
+                modalSegments[title].push(['#']);
                 for(var l = 0; l < route.segments.length; l++) {
                   html += '<div><h5>';
                   if (route.segments[l].sName != undefined)
@@ -408,9 +426,15 @@ function displayResults(results, handler) {
                     html += '<div>Get your tickets on <a href="' + route.segments[l].itineraries[0].legs[0].url + '" target="_blank">' + route.segments[l].itineraries[0].legs[0].host + '</a></div></div><hr>';
                   else 
                     html += '<div>Looks for the flight <a href="https://www.google.com/search?q=' + route.segments[l].itineraries[0].legs[0].hops[0].airline + '+' + route.segments[l].itineraries[0].legs[0].hops[0].flight + '" target="_blank">' + route.segments[l].itineraries[0].legs[0].hops[0].airline + ' ' + route.segments[l].itineraries[0].legs[0].hops[0].flight + '</a></div></div><hr>';
+                    
+                  if (route.segments[l].sPos != undefined) {
+                    var loc = route.segments[l].sPos.split(',');
+                    modalSegments[title].push([route.segments[l].sName + '_' + loc[0] + '_' + loc[1]]);
+                    loc = route.segments[l].tPos.split(',');
+                    modalSegments[title].push([route.segments[l].tName + '_' + loc[0] + '_' + loc[1]]);
+                  }
                 }
-                html += '</div><div class="map_modal">' +
-                        '</div></div></div></div></div>'
+                html += '</div><div class="map_modal"></div></div></div></div></div></div>'
                 $('#' + key + ' .list-group').append(html);
                 console.log(list[i][0]);
                 console.log(list[i][1]);
@@ -456,7 +480,6 @@ function calculateAndDisplayRoute(directionsService, directionsDisplay, toll, hi
       var duration = 0;
       // For each route, display summary information.
       $('#gmap_response .spinner').css('display', 'none');
-      $('#gmap_response .heading, #gmap_response .routes').html('');
       for (var i = 0; i < route.legs.length; i++) {
         if (route.legs[i].start_address != route.legs[i].end_address) {
           distance += route.legs[i].distance.value;
