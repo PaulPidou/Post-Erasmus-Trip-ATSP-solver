@@ -103,8 +103,8 @@ API_handler.prototype.addDummyNode = function(matrix, start, end) {
     return matrix;
 }
 
-API_handler.prototype.handle = function(locations) {
-  dataGot = [];
+API_handler.prototype.handle = function(locations, callback) {
+  var data = [];
   var link, oId, dId;
   var nb_data = 0;
   for(var i = 0; i < locations.length; i++) {
@@ -125,14 +125,14 @@ API_handler.prototype.handle = function(locations) {
         }
      })(j);
     }
-    dataGot.push(elem);
+    data.push(elem);
     })(i);
   }
   
   var getData = setInterval (function(){
     if (nb_data == (locations.length * (locations.length - 1))) {
         clearInterval(getData);
-        this.data = dataGot.slice();
+        callback(data);
     }
-  }, 100);
+  }, 5);
 }

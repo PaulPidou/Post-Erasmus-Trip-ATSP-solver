@@ -126,10 +126,12 @@ function initMap() {
       } else { // transit
         $("#gmap_response").css('display', 'none');
         $("#directions-panel").css('display', 'block');
-        results = transitCall(locations, start_end);
-        var draw = drawLines(results.cheapest, map);
-        poly.cheapest = draw.poly;
-        markers_transit.cheapest = draw.markers;
+        transitCall(locations, start_end, function(r) {
+          results = r;
+          var draw = drawLines(results.cheapest, map);
+          poly.cheapest = draw.poly;
+          markers_transit.cheapest = draw.markers;
+        });
       }
       modalMaps = [];
       var modals = document.getElementsByClassName('display_route_map');
@@ -205,12 +207,10 @@ function initMap() {
       target[0].nextSibling.className += ' in';
       target[0].nextSibling.style.display = 'block';
       var modal_body = target[0].nextSibling.firstChild.firstChild.childNodes[1];
-      console.log(modalSegments);
       for (var i = 0; i < modalMaps.length; i++) {
         if (modalMaps[i].title == modal_body.title) {
           if (modalMaps[i].first) {
             if (modal_body.title.indexOf('#') > -1) {
-              console.log(modal_body);
               var modalMap = new google.maps.Map(modal_body.firstChild.lastChild, {
                 center: {lat: 25, lng: 0},
                 zoom: 3
@@ -310,24 +310,14 @@ function drawLines(result, map) {
   };
 }
 
-function transitCall(locations, start_end){
+function transitCall(locations, start_end, callback){
   var handler = new API_handler();
-  //handler.handle(locations);
-  handler.data = data_test;
   var matrices = {
     cheapest: [],
     fatest: [],
     shortest: []
   };
   
-  ["cheapest", "fatest", "shortest"].forEach(function(value) {
-    if (start_end[0] != start_end[1]) {
-      matrices[value] = handler.addDummyNode(handler.getMatrix(value), start_end[0], start_end[1]);
-    } else {
-      matrices[value] = handler.getMatrix(value);
-    }
-  });
-      
   var solver = new ATSP();
   var results = {
     cheapest: [],
@@ -335,17 +325,26 @@ function transitCall(locations, start_end){
     shortest: []
   };
   
-  $.each(matrices, function(key, matrix) {
-    solver.anneal(matrix, start_end[0]);
-    var result = [];
-    for (var j = 0; j < solver.currentOrder.length - 1; j++) {
-      result.push(matrix[solver.currentOrder[j]][solver.currentOrder[j + 1]]);
-    }
-    result.push(matrix[solver.currentOrder[solver.currentOrder.length - 1]][solver.currentOrder[0]]);
-    results[key] = result;
+  handler.handle(locations, function(data) {
+    handler.data = data;
+    ["cheapest", "fatest", "shortest"].forEach(function(value) {
+      if (start_end[0] != start_end[1])
+        matrices[value] = handler.addDummyNode(handler.getMatrix(value), start_end[0], start_end[1]);
+      else
+        matrices[value] = handler.getMatrix(value);
+    });
+    $.each(matrices, function(key, matrix) {
+      solver.anneal(matrix, start_end[0]);
+      var result = [];
+      for (var j = 0; j < solver.currentOrder.length - 1; j++) {
+        result.push(matrix[solver.currentOrder[j]][solver.currentOrder[j + 1]]);
+      }
+      result.push(matrix[solver.currentOrder[solver.currentOrder.length - 1]][solver.currentOrder[0]]);
+      results[key] = result;
+    });
+    displayResults(results, handler);
+    callback(results);
   });
-  displayResults(results, handler);
-  return results;
 }
 
 function getGlyph(kind) {
