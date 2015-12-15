@@ -310,6 +310,39 @@ function drawLines(result, map) {
   };
 }
 
+function fixOrder(data) {
+  var orderedData = [];
+  var loc_from, loc_to;
+  
+  for(var i = 0; i < locations.length; i++) {
+    var one_city = [];
+    loc_from = locations[i][0] + '_' + locations[i][1] + '_' + locations[i][2];
+    for(var j = 0; j < locations.length; j++) {
+      if (i != j) {
+        loc_to = locations[j][0] + '_' + locations[j][1] + '_' + locations[j][2];
+        var elem = [];
+        elem.push(loc_from);
+        elem.push(loc_to);
+        one_city.push(elem);
+      }
+    }
+    orderedData.push(one_city);
+  }
+  
+  for(var i = 0; i < orderedData.length; i++) {
+    for(var j = 0; j < orderedData[i].length; j++) {
+      for(var k = 0; k < data.length; k++) {
+        for(var l = 0; l < data[k].length; l++) {
+          if (orderedData[i][j][0] == data[k][l][0] && orderedData[i][j][1] == data[k][l][1]) {
+            orderedData[i][j].push(data[k][l][2]);
+          }
+        }
+      }
+    }
+  }
+  return orderedData;
+}
+
 function transitCall(locations, start_end, callback){
   var handler = new API_handler();
   var matrices = {
@@ -326,13 +359,14 @@ function transitCall(locations, start_end, callback){
   };
   
   handler.handle(locations, function(data) {
-    handler.data = data;
+    handler.data = fixOrder(data);
     ["cheapest", "fatest", "shortest"].forEach(function(value) {
       if (start_end[0] != start_end[1])
         matrices[value] = handler.addDummyNode(handler.getMatrix(value), start_end[0], start_end[1]);
       else
         matrices[value] = handler.getMatrix(value);
     });
+    
     $.each(matrices, function(key, matrix) {
       solver.anneal(matrix, start_end[0]);
       var result = [];
@@ -389,6 +423,7 @@ function displayResults(results, handler) {
   var duration, price, distance;
   var routes;
   var html;
+  console.log(handler.data);
   
   $.each(results, function(key, list) {
     $('#' + key + ' .spinner').css('display', 'none');
@@ -440,11 +475,13 @@ function displayResults(results, handler) {
                     html += route.segments[l].sCode + ' - ' + route.segments[l].tCode;
                   html += '<span class="badge pull-right"><span class="' + getGlyph(route.segments[l].kind) +  '"></span></span></h5>' +
                           '<div><span class="glyphicon glyphicon-resize-small"></span> ' + Math.round(route.segments[l].distance).toString() + ' kms <span class="glyphicon glyphicon-time"></span> ' + getDurationString(route.segments[l].duration) +'</div>';
-                  if (route.segments[l].itineraries[0].legs[0].host != undefined)
-                    html += '<div>Get your tickets on <a href="' + route.segments[l].itineraries[0].legs[0].url + '" target="_blank">' + route.segments[l].itineraries[0].legs[0].host + '</a></div></div><hr>';
-                  else {
-                    var flight = getCheapestFlight(route.segments[l].itineraries);
-                    html += '<div>Looks for the flight <a href="https://www.google.com/search?q=' + flight[0] + '+' + flight[1] + '" target="_blank">' + flight[0] + ' ' + flight[1] + '</a></div></div><hr>';
+                  if (route.segments[l].itineraries != undefined) {
+                    if (route.segments[l].itineraries[0].legs[0].host != undefined)
+                      html += '<div>Get your tickets on <a href="' + route.segments[l].itineraries[0].legs[0].url + '" target="_blank">' + route.segments[l].itineraries[0].legs[0].host + '</a></div></div><hr>';
+                    else {
+                      var flight = getCheapestFlight(route.segments[l].itineraries);
+                      html += '<div>Looks for the flight <a href="https://www.google.com/search?q=' + flight[0] + '+' + flight[1] + '" target="_blank">' + flight[0] + ' ' + flight[1] + '</a></div></div><hr>';
+                    }
                   }
                   if (route.segments[l].sPos != undefined) {
                     var loc = route.segments[l].sPos.split(',');
