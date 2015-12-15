@@ -204,7 +204,7 @@ function initMap() {
     if (target[0].nextSibling.className == 'modal fade') {
       target[0].nextSibling.className += ' in';
       target[0].nextSibling.style.display = 'block';
-      var modal_body = target[0].nextSibling.firstChild.firstChild.lastChild;
+      var modal_body = target[0].nextSibling.firstChild.firstChild.childNodes[1];
       console.log(modalSegments);
       for (var i = 0; i < modalMaps.length; i++) {
         if (modalMaps[i].title == modal_body.title) {
@@ -374,8 +374,19 @@ function getDurationString(duration, seconds) {
   return Math.floor(duration / 60).toString() + 'h' + minutes;
 }
 
+function getCheapestFlight(itineraries) {
+  var min = itineraries[0].legs[0].indicativePrice.price, index = 0;
+  for(var i = 1; i <  itineraries.length; i++) {
+    if (itineraries[i].legs[0].indicativePrice.price < min) {
+      min = itineraries[i].legs[0].indicativePrice.price;
+      index = i;
+    }
+  }
+  return [itineraries[index].legs[0].hops[0].airline, itineraries[index].legs[0].hops[0].flight];
+}
+
 function displayResults(results, handler) {
-  var from, to;
+  var from, to, from_addr, to_addr;
   var duration, price, distance;
   var routes;
   var html;
@@ -390,6 +401,13 @@ function displayResults(results, handler) {
               if (list[i][1] == handler.indexes[key][j][k][1]) {
                 from = list[i][0].split('_');
                 to = list[i][1].split('_');
+                
+                for(var l = 0; l < locations.length; l++) {
+                  if (from[0] == locations[l][0] && from[1] == locations[l][1] && from[2] == locations[l][2]) 
+                    from_addr = locations[l][3].replace(', ', '-');
+                  if (to[0] == locations[l][0] && to[1] == locations[l][1] && to[2] == locations[l][2])
+                    to_addr = locations[l][3].replace(', ', '-');
+                }
                 
                 route = handler.data[handler.indexes[key][j][k][2]][handler.indexes[key][j][k][3]][2].routes[handler.indexes[key][j][k][4]];
                 distance += route.distance;
@@ -412,6 +430,7 @@ function displayResults(results, handler) {
                         '</div>' +
                         '<div class="modal-body display_route_map" title="' + title + '"><div class="row">' +
                         '<div class="right-panel">';
+                        
                 modalSegments[title] = [];
                 modalSegments[title].push(['#']);
                 for(var l = 0; l < route.segments.length; l++) {
@@ -424,9 +443,10 @@ function displayResults(results, handler) {
                           '<div><span class="glyphicon glyphicon-resize-small"></span> ' + Math.round(route.segments[l].distance).toString() + ' kms <span class="glyphicon glyphicon-time"></span> ' + getDurationString(route.segments[l].duration) +'</div>';
                   if (route.segments[l].itineraries[0].legs[0].host != undefined)
                     html += '<div>Get your tickets on <a href="' + route.segments[l].itineraries[0].legs[0].url + '" target="_blank">' + route.segments[l].itineraries[0].legs[0].host + '</a></div></div><hr>';
-                  else 
-                    html += '<div>Looks for the flight <a href="https://www.google.com/search?q=' + route.segments[l].itineraries[0].legs[0].hops[0].airline + '+' + route.segments[l].itineraries[0].legs[0].hops[0].flight + '" target="_blank">' + route.segments[l].itineraries[0].legs[0].hops[0].airline + ' ' + route.segments[l].itineraries[0].legs[0].hops[0].flight + '</a></div></div><hr>';
-                    
+                  else {
+                    var flight = getCheapestFlight(route.segments[l].itineraries);
+                    html += '<div>Looks for the flight <a href="https://www.google.com/search?q=' + flight[0] + '+' + flight[1] + '" target="_blank">' + flight[0] + ' ' + flight[1] + '</a></div></div><hr>';
+                  }
                   if (route.segments[l].sPos != undefined) {
                     var loc = route.segments[l].sPos.split(',');
                     modalSegments[title].push([route.segments[l].sName + '_' + loc[0] + '_' + loc[1]]);
@@ -434,11 +454,10 @@ function displayResults(results, handler) {
                     modalSegments[title].push([route.segments[l].tName + '_' + loc[0] + '_' + loc[1]]);
                   }
                 }
-                html += '</div><div class="map_modal"></div></div></div></div></div></div>'
+                html += '</div><div class="map_modal"></div></div></div><div class="modal-footer">' +
+                        '<a href="http://www.rome2rio.com/en/s/' + from_addr + '/' + to_addr + '" target="_blank">Check the road on Rome2io website</a>' +
+                        '</div></div></div></div>'
                 $('#' + key + ' .list-group').append(html);
-                console.log(list[i][0]);
-                console.log(list[i][1]);
-                console.log(handler.data[handler.indexes[key][j][k][2]][handler.indexes[key][j][k][3]][2].routes[handler.indexes[key][j][k][4]]);
               }
             }
           }
@@ -488,17 +507,20 @@ function calculateAndDisplayRoute(directionsService, directionsDisplay, toll, hi
           if (parseInt(time_span[2]) < 10) {
             time_span[2] = "0" + time_span[2];
           }
-          html = '<div class="list-group-item" type="button">' + route.legs[i].start_address.split(',')[0] + ' - ' + route.legs[i].end_address.split(',')[0] + '<br>' + time_span[0] + 'h' + time_span[2] + '<span class="pull-right">' + Math.round(route.legs[i].distance.value/1000).toString() + ' kms </span>' + '</div>';
+          var from = route.legs[i].start_address.split(', '), to = route.legs[i].end_address.split(', ');
+          html = '<div class="list-group-item" type="button">' + from[0] + ' - ' + to[0] + '<br>' + time_span[0] + 'h' + time_span[2] + '<span class="pull-right">' + Math.round(route.legs[i].distance.value/1000).toString() + ' kms </span>' + '</div>';
           html += '<div class="modal fade" tabindex="-1" role="dialog">' +
                     '<div class="modal-dialog modal-lg">' +
                       '<div class="modal-content">' +
                         '<div class="modal-header">' + 
                           '<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span class="close" aria-hidden="true">&times;</span></button>' +
-                          '<h4 class="modal-title">' + route.legs[i].start_address.split(',')[0] + ' - ' + route.legs[i].end_address.split(',')[0] + '</h4>' +
+                          '<h4 class="modal-title">' + from[0] + ' - ' + to[0] + '</h4>' +
                         '</div>' +
                         '<div class="modal-body display_route_map" title="' + route.legs[i].start_address + '_' + route.legs[i].end_address + '"><div class="row">' +
                         '<div class="right-panel"></div><div class="map_modal"></div>' +
-                        '</div></div></div></div></div>'
+                        '</div></div><div class="modal-footer">' +
+                        '<a href="https://www.google.com/maps/dir/' + from[0] + ',+' + from [1] + '/' + to[0] + ',+' + to[1] + '" target="_blank">Check the road on Google Maps website</a>' +
+                        '</div></div></div></div>'
            $('#gmap_response .routes').append(html);
         }
       }
