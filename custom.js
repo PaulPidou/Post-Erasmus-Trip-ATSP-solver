@@ -62,6 +62,13 @@ function initMap() {
       }
     }
     cleanMap();
+    $("#directions-panel .heading, #directions-panel .routes").html('');
+    $("#gmap_response .heading, #gmap_response .routes").html('');
+    $("#directions-panel").css('display', 'none');
+    $('#gmap_response').css('display', 'none');
+    $('#gmap_response .spinner').css('display', 'block');
+    ["cheapest", "fatest", "shortest"].forEach(function(key) {$('#' + key + ' .spinner').css('display', 'block'); });
+    
     bounds = new google.maps.LatLngBounds();
     text = '';
 
@@ -423,7 +430,6 @@ function displayResults(results, handler) {
   var duration, price, distance;
   var routes;
   var html;
-  console.log(handler.data);
   
   $.each(results, function(key, list) {
     $('#' + key + ' .spinner').css('display', 'none');
