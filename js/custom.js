@@ -488,7 +488,8 @@ function displayResults(results, handler) {
                       var flight = getCheapestFlight(route.segments[l].itineraries);
                       html += '<div>Looks for the flight <a href="https://www.google.com/search?q=' + flight[0] + '+' + flight[1] + '" target="_blank">' + flight[0] + ' ' + flight[1] + '</a></div></div><hr>';
                     }
-                  }
+                  } else
+                    html += '</div><hr>';
                   if (route.segments[l].sPos != undefined) {
                     var loc = route.segments[l].sPos.split(',');
                     modalSegments[title].push([route.segments[l].sName + '_' + loc[0] + '_' + loc[1]]);
