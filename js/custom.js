@@ -133,6 +133,7 @@ function initMap() {
       } else { // transit
         $("#gmap_response").css('display', 'none');
         $("#directions-panel").css('display', 'block');
+        $("#tab_cheapest").click();
         transitCall(locations, start_end, function(r) {
           results = r;
           var draw = drawLines(results.cheapest, map);
@@ -263,6 +264,7 @@ function initMap() {
   $('#directions-panel .nav a').click(function (e) {
     e.preventDefault();
     $(this).tab('show');
+    if($('#cheapest .heading')[0].innerHTML == '') return;
     cleanMap();
     var value = $(this).attr('href').substring(1);
     var drawing = drawLines(results[value], map);
