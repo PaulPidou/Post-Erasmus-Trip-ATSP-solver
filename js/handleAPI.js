@@ -146,7 +146,7 @@ API_handler.prototype.handle = function(locations, callback) {
     for(var j = 0; j < locations.length; j++) {
       (function(j) {
         if (i != j) {
-          link = "http://free.rome2rio.com/api/1.2/json/Search?key=XRpzZBCX&oName=" + locations[i][0] + "&oPos=" + locations[i][1] + "," + locations[i][2] + "&oKind=city&dName=" + locations[j][0] + "&dPos=" + locations[j][1] + "," + locations[j][2] + "&dKind=city&currencyCode=EUR";
+          link = "http://free.rome2rio.com/api/1.2/json/Search?key=[API-KEY]&oName=" + locations[i][0] + "&oPos=" + locations[i][1] + "," + locations[i][2] + "&oKind=city&dName=" + locations[j][0] + "&dPos=" + locations[j][1] + "," + locations[j][2] + "&dKind=city&currencyCode=EUR";
           oId = locations[i][0] + '_' +  locations[i][1] + '_' + locations[i][2];
           dId = locations[j][0] + '_' +  locations[j][1] + '_' + locations[j][2];
           (function(oId, dId) {
