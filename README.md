@@ -1,6 +1,6 @@
 # Post Erasmus Trip (ATSP solver)
 
-This project aims to help former Erasmus students (or travellers in general) to schedule their next trips accross the world.
+This project aims to help former Erasmus students (or travellers in general) to schedule their next trips across the world.
 You can see it working here : http://www.paul-pidou.name/projects/post-erasmus/erasmus-trip.html
 
 ### Usage
