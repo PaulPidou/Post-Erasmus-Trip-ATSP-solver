@@ -103,6 +103,39 @@ API_handler.prototype.addDummyNode = function(matrix, start, end) {
     return matrix;
 }
 
+API_handler.prototype.fixOrder = function(locations, data) {
+  var orderedData = [];
+  var loc_from, loc_to;
+  
+  for(var i = 0; i < locations.length; i++) {
+    var one_city = [];
+    loc_from = locations[i][0] + '_' + locations[i][1] + '_' + locations[i][2];
+    for(var j = 0; j < locations.length; j++) {
+      if (i != j) {
+        loc_to = locations[j][0] + '_' + locations[j][1] + '_' + locations[j][2];
+        var elem = [];
+        elem.push(loc_from);
+        elem.push(loc_to);
+        one_city.push(elem);
+      }
+    }
+    orderedData.push(one_city);
+  }
+  
+  for(var i = 0; i < orderedData.length; i++) {
+    for(var j = 0; j < orderedData[i].length; j++) {
+      for(var k = 0; k < data.length; k++) {
+        for(var l = 0; l < data[k].length; l++) {
+          if (orderedData[i][j][0] == data[k][l][0] && orderedData[i][j][1] == data[k][l][1]) {
+            orderedData[i][j].push(data[k][l][2]);
+          }
+        }
+      }
+    }
+  }
+  return orderedData;
+}
+
 API_handler.prototype.handle = function(locations, callback) {
   var data = [];
   var link, oId, dId;
@@ -129,10 +162,12 @@ API_handler.prototype.handle = function(locations, callback) {
     })(i);
   }
   
+  var self = this;
   var getData = setInterval (function(){
     if (nb_data == (locations.length * (locations.length - 1))) {
         clearInterval(getData);
-        callback(data);
+        self.data = self.fixOrder(locations, data);
+        callback();
     }
   }, 5);
 }

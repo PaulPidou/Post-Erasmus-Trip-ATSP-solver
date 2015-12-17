@@ -317,39 +317,6 @@ function drawLines(result, map) {
   };
 }
 
-function fixOrder(data) {
-  var orderedData = [];
-  var loc_from, loc_to;
-  
-  for(var i = 0; i < locations.length; i++) {
-    var one_city = [];
-    loc_from = locations[i][0] + '_' + locations[i][1] + '_' + locations[i][2];
-    for(var j = 0; j < locations.length; j++) {
-      if (i != j) {
-        loc_to = locations[j][0] + '_' + locations[j][1] + '_' + locations[j][2];
-        var elem = [];
-        elem.push(loc_from);
-        elem.push(loc_to);
-        one_city.push(elem);
-      }
-    }
-    orderedData.push(one_city);
-  }
-  
-  for(var i = 0; i < orderedData.length; i++) {
-    for(var j = 0; j < orderedData[i].length; j++) {
-      for(var k = 0; k < data.length; k++) {
-        for(var l = 0; l < data[k].length; l++) {
-          if (orderedData[i][j][0] == data[k][l][0] && orderedData[i][j][1] == data[k][l][1]) {
-            orderedData[i][j].push(data[k][l][2]);
-          }
-        }
-      }
-    }
-  }
-  return orderedData;
-}
-
 function transitCall(locations, start_end, callback){
   var handler = new API_handler();
   var matrices = {
@@ -365,8 +332,7 @@ function transitCall(locations, start_end, callback){
     shortest: []
   };
   
-  handler.handle(locations, function(data) {
-    handler.data = fixOrder(data);
+  handler.handle(locations, function() {
     ["cheapest", "fatest", "shortest"].forEach(function(value) {
       if (start_end[0] != start_end[1])
         matrices[value] = handler.addDummyNode(handler.getMatrix(value), start_end[0], start_end[1]);
