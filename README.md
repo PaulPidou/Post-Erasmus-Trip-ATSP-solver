@@ -19,7 +19,7 @@ You can obtain more details about a specific road just by clicking on the corres
 
 ## Under the hood
 
-This project was mainly for me the occasion to play around with the Asymmetric Traveling Salesman Problem (ATSP)
+This project was mainly for me the occasion to play around with the Asymmetric Traveling Salesman Problem (ATSP).
 I solved it thanks to the simulated annealing technique (you can find the code in the atsp.js file)
 
 ### Design
@@ -32,7 +32,7 @@ I used the Google Maps and the Rome2rio APIs.
 
 ## How to use on your computer
 
-As this tool is completely javascript powered you can simply download it and launch it in your browser
+As this tool is completely javascript powered you can simply download it and launch it in your browser.
 You just have to request for API Keys to Google Map (https://developers.google.com/maps/signup) and to Rome2rio (http://www.rome2rio.com/documentation).
 Once obtained just replace the '[API-KEY]' tag in the erasmus-trip.html file by you Google Map API key and the '[API-KEY]' tag in the handleAPI.js file by your Rome2rio API key.
 
