@@ -34,6 +34,6 @@ I used the Google Maps and the Rome2rio APIs.
 
 As this tool is completely javascript powered you can simply download it and launch it in your browser
 You just have to request for API Keys to Google Map (https://developers.google.com/maps/signup) and to Rome2rio (http://www.rome2rio.com/documentation).
-Once obtained just replace the '[API-KEY]' tag in the custom.js file by you Google Map API key and the '[API-KEY]' tag in the handleAPI.js file by your Rome2rio API key.
+Once obtained just replace the '[API-KEY]' tag in the custom.js file by you Google Map API key and the '[API-KEY]' tag in the erasmus-trip.html file by your Rome2rio API key.
 
 “There are no foreign lands. It is the traveler only who is foreign.” – Robert Louis Stevenson
