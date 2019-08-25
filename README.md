@@ -1,7 +1,6 @@
 # Post Erasmus Trip (ATSP solver)
 
 This project aims to help former Erasmus students (or travellers in general) to schedule their next trips across the world.
-You can see it working here : http://www.paul-pidou.name/projects/post-erasmus/erasmus-trip.html
 
 ### Usage
 To add location to visit, you simply have to search for it thanks to the input field and clic on the place you want on the list. Once added, a place can be set as start and/or end point of the trip or it can be removed. You can choose between two modes: car or transit.
